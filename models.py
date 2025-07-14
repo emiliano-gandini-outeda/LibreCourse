@@ -6,74 +6,75 @@ import uuid
 from db import Base
 
 # Many-to-many relationships
-curso_estudiante = Table(
-    "curso_estudiante", Base.metadata,
-    Column("usuario_id", UUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="CASCADE"), primary_key=True),
-    Column("curso_id", UUID(as_uuid=True), ForeignKey("cursos.id", ondelete="CASCADE"), primary_key=True)
+course_student = Table(
+    "course_student", Base.metadata,
+    Column("user_id", UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    Column("course_id", UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), primary_key=True)
 )
 
-class Usuario(Base):
-    __tablename__ = "usuarios"
+class User(Base):
+    __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False)
     username = Column(String(50), nullable=False)
     password_hash = Column(Text, nullable=False)
-    rol = Column(String, default="estudiante")
+    role = Column(String, default="student")
     avatar_url = Column(Text, nullable=True)
-    fecha_creacion = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    cursos_inscriptos = relationship("Curso", secondary=curso_estudiante, back_populates="estudiantes")
-    cursos_creados = relationship("Curso", back_populates="creador")
-    notas = relationship("Nota", back_populates="usuario", cascade="all, delete-orphan")
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    enrolled_courses = relationship("Course", secondary=course_student, back_populates="students")
+    created_courses = relationship("Course", back_populates="creator")
+    notes = relationship("Note", back_populates="user", cascade="all, delete-orphan")
+    
     @property
     def display_name(self):
         return f"{self.username}#{str(self.id)[:6]}"
 
-class Curso(Base):
-    __tablename__ = "cursos"
+class Course(Base):
+    __tablename__ = "courses"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    nombre = Column(Text, nullable=False, index=True)
-    descripcion = Column(Text)
-    creador_id = Column(UUID(as_uuid=True), ForeignKey("usuarios.id"))
-    categoria = Column(String)
-    portada_url = Column(Text)
-    fecha_creacion = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    ultima_actualizacion = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    estado = Column(String, default="activo")
-    estudiantes = relationship("Usuario", secondary=curso_estudiante)
-    creador = relationship("Usuario", back_populates="cursos_creados")
-    lecciones = relationship("Leccion", back_populates="curso", cascade="all, delete-orphan")
-    categoria_id = Column(UUID(as_uuid=True), ForeignKey("categorias.id", ondelete="SET NULL"), nullable=True)
-    categoria_obj = relationship("Categoria", back_populates="cursos")
+    name = Column(Text, nullable=False, index=True)
+    description = Column(Text)
+    creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    category = Column(String)
+    cover_url = Column(Text)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    status = Column(String, default="active")
+    students = relationship("User", secondary=course_student, back_populates="enrolled_courses")
+    creator = relationship("User", back_populates="created_courses")
+    lessons = relationship("Lesson", back_populates="course", cascade="all, delete-orphan")
+    category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
+    category_obj = relationship("Category", back_populates="courses")
     
-class Leccion(Base):
-    __tablename__ = "lecciones"
+class Lesson(Base):
+    __tablename__ = "lessons"
     
-    id = Column(UUID(as_uuid=True), primary_key = True, default = uuid.uuid4)
-    titulo = Column(Text, nullable=False)
-    descripcion = Column(Text)
-    contenido = Column(Text)
-    fecha_creacion = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    curso_id = Column(UUID(as_uuid=True), ForeignKey("cursos.id", ondelete="CASCADE"))
-    curso = relationship("Curso", back_populates="lecciones")
-    notas = relationship("Nota", back_populates="leccion", cascade="all, delete-orphan")
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    title = Column(Text, nullable=False)
+    description = Column(Text)
+    content = Column(Text)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"))
+    course = relationship("Course", back_populates="lessons")
+    notes = relationship("Note", back_populates="lesson", cascade="all, delete-orphan")
     
-class Nota(Base):
-    __tablename__ = "notas"
+class Note(Base):
+    __tablename__ = "notes"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    contenido = Column(Text, nullable=False)  # Texto en Markdown
-    fecha_creacion = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    usuario_id = Column(UUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="CASCADE"))
-    leccion_id = Column(UUID(as_uuid=True), ForeignKey("lecciones.id", ondelete="CASCADE"))
-    usuario = relationship("Usuario", back_populates="notas")
-    leccion = relationship("Leccion", back_populates="notas")
+    content = Column(Text, nullable=False)  # Markdown text
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    lesson_id = Column(UUID(as_uuid=True), ForeignKey("lessons.id", ondelete="CASCADE"))
+    user = relationship("User", back_populates="notes")
+    lesson = relationship("Lesson", back_populates="notes")
     
-class Categoria(Base):
-    __tablename__ = "categorias"
+class Category(Base):
+    __tablename__ = "categories"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    nombre = Column(String(100), unique=True, nullable=False)
-    descripcion = Column(Text)
-    cursos = relationship("Curso", back_populates="categoria_obj", cascade="all")
+    name = Column(String(100), unique=True, nullable=False)
+    description = Column(Text)
+    courses = relationship("Course", back_populates="category_obj", cascade="all")

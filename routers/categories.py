@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List
 
-from models import Categoria
-from schemas import CategoriaOut
+from models import Category
+from schemas import CategoryOut
 from db import get_db
 
-router = APIRouter(prefix="/categories",tags=["Categories"])
+router = APIRouter(prefix="/categories", tags=["Categories"])
 
-@router.get("/categories", response_model=List[CategoriaOut])
+@router.get("/", response_model=List[CategoryOut])
 def list_categories(db: Session = Depends(get_db)):
-    return db.query(Categoria).all()
+    return db.query(Category).all()

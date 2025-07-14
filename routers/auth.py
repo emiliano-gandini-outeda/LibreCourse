@@ -5,19 +5,15 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from uuid import UUID
-
-# Direct imports from parent
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from models import Usuario
+from models import User
 import crud
 from db import get_db
 
 # JWT configuration
-SECRET_KEY = os.environ.get("SECRET_KEY")
-ALGORITHM = os.environ.get("ALGORITHM")
+SECRET_KEY = os.environ.get("SECRET_KEY", "your-secret-key-here")
+ALGORITHM = os.environ.get("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 # OAuth2 token extractor
@@ -39,7 +35,7 @@ def create_access_token(user_id: UUID) -> str:
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 # Get user from token
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Usuario:
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate token",
@@ -54,7 +50,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     except (JWTError, ValueError):
         raise credentials_exception
 
-    user = db.query(Usuario).filter(Usuario.id == user_uuid).first()
+    user = db.query(User).filter(User.id == user_uuid).first()
     if user is None:
         raise credentials_exception
     return user
