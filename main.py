@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from db import engine, Base
 from models import Usuario, Curso, Leccion, Nota 
-from routers.auth_routers import auth_routes
+from routers.auth_routers import auth_router
 
 app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 
-app.include_router(auth_routes.router)
+app.include_router(auth_router)
 
 
 # Healthcheck
