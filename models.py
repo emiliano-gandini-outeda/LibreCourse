@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import uuid
-from .db import Base
+from db import Base
 
 # Many-to-many relationships
 curso_estudiante = Table(
