@@ -28,14 +28,28 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+class CategoriaBase(BaseModel):
+    nombre: str
+    descripcion: Optional[str] = None
+
+class CategoriaOut(CategoriaBase):
+    id: UUID4
+
+    class Config:
+        orm_mode = True
+
+
 class CourseBase(BaseModel):
     nombre: str
     descripcion: Optional[str] = None
     categoria: Optional[str] = None
     portada_url: Optional[str] = None
 
-class CourseCreate(CourseBase):
-    pass
+class CourseCreate(BaseModel):
+    nombre: str
+    descripcion: Optional[str] = None
+    portada_url: Optional[str] = None
+    categoria_id: Optional[UUID4] 
 
 class CourseUpdate(BaseModel):
     nombre: Optional[str]
@@ -43,12 +57,16 @@ class CourseUpdate(BaseModel):
     categoria: Optional[str]
     portada_url: Optional[str]
 
-class CourseOut(CourseBase):
+class CourseOut(BaseModel):
     id: UUID4
+    nombre: str
+    descripcion: Optional[str]
+    portada_url: Optional[str]
+    estado: str
     creador_id: UUID4
+    categoria_obj: Optional[CategoriaOut]
     fecha_creacion: datetime
     ultima_actualizacion: datetime
-    estado: str
 
     class Config:
         orm_mode = True

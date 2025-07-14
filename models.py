@@ -44,6 +44,8 @@ class Curso(Base):
     estudiantes = relationship("Usuario", secondary=curso_estudiante)
     creador = relationship("Usuario", back_populates="cursos_creados")
     lecciones = relationship("Leccion", back_populates="curso", cascade="all, delete-orphan")
+    categoria_id = Column(UUID(as_uuid=True), ForeignKey("categorias.id", ondelete="SET NULL"), nullable=True)
+    categoria_obj = relationship("Categoria", back_populates="cursos")
     
 class Leccion(Base):
     __tablename__ = "lecciones"
@@ -67,3 +69,11 @@ class Nota(Base):
     leccion_id = Column(UUID(as_uuid=True), ForeignKey("lecciones.id", ondelete="CASCADE"))
     usuario = relationship("Usuario", back_populates="notas")
     leccion = relationship("Leccion", back_populates="notas")
+    
+class Categoria(Base):
+    __tablename__ = "categorias"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    nombre = Column(String(100), unique=True, nullable=False)
+    descripcion = Column(Text)
+    cursos = relationship("Curso", back_populates="categoria_obj", cascade="all")
