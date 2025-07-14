@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, UUID4
 from uuid import UUID
+from typing import Optional, List
 from datetime import datetime, timezone
 
 # Request body for user registration
@@ -27,15 +28,27 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
-class CourseCreate(BaseModel):
+class CourseBase(BaseModel):
     nombre: str
-    descripcion: str | None = None
-    categoria: str | None = None
+    descripcion: Optional[str] = None
+    categoria: Optional[str] = None
+    portada_url: Optional[str] = None
 
-class CourseOut(BaseModel):
-    id: UUID
-    nombre: str
-    descripcion: str | None
+class CourseCreate(CourseBase):
+    pass
+
+class CourseUpdate(BaseModel):
+    nombre: Optional[str]
+    descripcion: Optional[str]
+    categoria: Optional[str]
+    portada_url: Optional[str]
+
+class CourseOut(CourseBase):
+    id: UUID4
+    creador_id: UUID4
     fecha_creacion: datetime
+    ultima_actualizacion: datetime
+    estado: str
+
     class Config:
         orm_mode = True

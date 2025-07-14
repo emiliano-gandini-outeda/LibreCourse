@@ -8,3 +8,4 @@ pydantic
 python-dotenv
 email-validator
 python-multipart
+markdown
