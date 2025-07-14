@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import uuid
 from .db import Base
 
-# Relaciones muchos a muchos
+# Many-to-many relationships
 curso_estudiante = Table(
     "curso_estudiante", Base.metadata,
     Column("usuario_id", UUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="CASCADE"), primary_key=True),
