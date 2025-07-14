@@ -17,7 +17,7 @@ class Usuario(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False)
-    username = Column(String(50), unique=True, nullable=False)
+    username = Column(String(50), nullable=False)
     password_hash = Column(Text, nullable=False)
     rol = Column(String, default="estudiante")
     avatar_url = Column(Text, nullable=True)
@@ -25,6 +25,9 @@ class Usuario(Base):
     cursos_inscriptos = relationship("Curso", secondary=curso_estudiante, back_populates="estudiantes")
     cursos_creados = relationship("Curso", back_populates="creador")
     notas = relationship("Nota", back_populates="usuario", cascade="all, delete-orphan")
+    @property
+    def display_name(self):
+        return f"{self.username}#{str(self.id)[:6]}"
 
 class Curso(Base):
     __tablename__ = "cursos"
