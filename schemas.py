@@ -154,11 +154,3 @@ class TokenData(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
-
-# Pagination schema
-class PaginatedResponse(BaseModel):
-    items: List
-    total: int
-    page: int
-    size: int
-    pages: int
