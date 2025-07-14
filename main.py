@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from db import engine, Base
 from models import Usuario, Curso, Leccion, Nota 
-from routers import auth_routes
+from routers.auth_routers import auth_routes
 
 app = FastAPI()
 
