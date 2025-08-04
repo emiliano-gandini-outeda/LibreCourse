@@ -1,10 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CourseTrackr</title>
+    <title>All Courses</title>
+    {% load tz %}
+    <script>
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    document.cookie = "user_timezone=" + tz + ";path=/";
+    </script>
 </head>
 <body>
-  <h1>Welcome to CourseTrackr's Course Homepage</h1>
-  <h2>This is a placeholder page</h2>
+    <h1>All Courses</h1>
+
+    {% if courses %}
+        <ul>
+        {% for course in courses %}
+            <li>
+            <a href="{% url 'course-detail' course.id %}"> {{ course.title }} </a> - {{ course.created_at|localtime }}
+            </li>
+        {% endfor %}
+        </ul>
+            
+    {% else %}
+        <p>No courses found.</p>
+    {% endif %}
 </body>
 </html>
