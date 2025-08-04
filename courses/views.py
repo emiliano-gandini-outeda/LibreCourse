@@ -6,8 +6,6 @@ from django.http import HttpResponse
 
 # Create your views here.
 
-print("TEMPLATE DIRS:", settings.TEMPLATES[0]['DIRS'])
-
 def course_home(request):
         return render(request, 'courses/home.html')
     
