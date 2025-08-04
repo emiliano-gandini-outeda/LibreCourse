@@ -87,6 +87,9 @@ DATABASES = {
     
 }
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://coursetrackr-production-dc46.up.railway.app'
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
