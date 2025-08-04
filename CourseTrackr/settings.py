@@ -35,7 +35,7 @@ SECRET_KEY = 'django-insecure-#k^n@^qs_g-$m#j^$^#*gqz4-rt1w16#$rl@4*pbi-@h#dndp+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["coursetrackr-production-dc46.up.railway.app", env("LOCAL_HOST", default="localhost")]
+ALLOWED_HOSTS = ["coursetrackr-production-dc46.up.railway.app", env("LOCAL_HOST", default="localhost"), "127.0.0.1" ]
 
 
 # Application definition
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'courses',
+    'users',
 ]
 
 MIDDLEWARE = [

@@ -15,7 +15,7 @@
         <ul>
         {% for course in courses %}
             <li>
-            <a href="{% url 'course-detail' course.id %}"> {{ course.title }} </a> - {{ course.created_at|localtime }}
+            <a href="{% url 'course-detail' course.id %}"> {{ course.title }} </a> - {{ course.createdDate|localtime }}
             </li>
         {% endfor %}
         </ul>
