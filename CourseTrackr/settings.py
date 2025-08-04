@@ -7,8 +7,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 env.read_env(BASE_DIR / ".env")
 
-print("ENV DB_NAME:", env('DB_NAME', default='[NOT SET]'))
-
 """
 Django settings for CourseTrackr project.
 
