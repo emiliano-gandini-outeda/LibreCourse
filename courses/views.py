@@ -5,9 +5,6 @@ from .models import Course
 from django.http import HttpResponse
 
 # Create your views here.
-
-def course_home(request):
-        return render(request, 'courses/home.html')
     
 def course_page(request, id):
         tzname = request.COOKIES.get("user_timezone")
