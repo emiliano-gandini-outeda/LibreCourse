@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-#k^n@^qs_g-$m#j^$^#*gqz4-rt1w16#$rl@4*pbi-@h#dndp+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["coursetrackr-production-dc46.up.railway.app"]
 
 
 # Application definition
