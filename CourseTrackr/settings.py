@@ -1,5 +1,6 @@
 import environ
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,7 +35,7 @@ SECRET_KEY = 'django-insecure-#k^n@^qs_g-$m#j^$^#*gqz4-rt1w16#$rl@4*pbi-@h#dndp+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["coursetrackr-production-dc46.up.railway.app"]
+ALLOWED_HOSTS = ["coursetrackr-production-dc46.up.railway.app", env("LOCAL_HOST")]
 
 
 # Application definition
@@ -125,6 +126,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
