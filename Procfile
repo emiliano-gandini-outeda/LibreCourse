@@ -1,1 +1,1 @@
-web: gunicorn coursetrackr.wsgi
+web: gunicorn CourseTrackr.wsgi
