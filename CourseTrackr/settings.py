@@ -48,13 +48,25 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'courses',
-    'users',
-    
     # allauth core
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    # Fucking TailwindCSS (29834723478923 tries to install it, my npx was broken lol)
+    'tailwind',
+    'theme',
+    #Apps
+    'courses',
+    'users',
+
+]
+
+NPM_BIN_PATH = r"C:\Program Files\nodejs\npm.cmd" # I hate Node
+
+TAILWIND_APP_NAME = 'theme'
+
+INTERNAL_IPS = [
+    "127.0.0.1",
 ]
 
 MIDDLEWARE = [
@@ -79,7 +91,7 @@ ROOT_URLCONF = 'CourseTrackr.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -141,7 +153,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
