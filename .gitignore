@@ -6,3 +6,5 @@ __pycache__/
 /courses/__pycache__
 /CourseTrackr/__pycache__
 /courses/__pycache__
+/courses/__pycache__
+*.pyc
