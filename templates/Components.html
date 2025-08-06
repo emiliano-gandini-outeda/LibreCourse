@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>COMPONENTS</title>
+  <meta name="description" content="" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!--
+  Color Primary :  gray-800 (dark grey) 
+  Color Secondary : gray-500 (grey)
+  Color Accent :  red-500 (red)
+  BG Color gray-300 (very light grey)
+  Text Color : gray-900 (dark text)
+  Text Secondary : gray-600 (lighter text)
+  -->
+  <link href="/dist/output.css" rel="stylesheet">
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" x-data="{ open: false }">
+    <div class="navbar-container">
+      <h1 class="navbar-brand">Brand</h1>
+
+      <!-- Desktop Menu -->
+      <ul class="navbar-menu">
+        <li><a href="#" class="navbar-link">Home</a></li>
+        <li><a href="#" class="navbar-link">About</a></li>
+        <li><a href="#" class="navbar-link">Contact</a></li>
+      </ul>
+
+      <!-- Hamburger Button -->
+      <button class="navbar-burger" @click="open = !open" :aria-expanded="open.toString()" aria-label="Toggle menu">
+        <span :class="open ? 'burger-line burger-top-open' : 'burger-line'"></span>
+        <span :class="open ? 'burger-line burger-middle-open' : 'burger-line'"></span>
+        <span :class="open ? 'burger-line burger-bottom-open' : 'burger-line'"></span>
+      </button>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" x-show="open" x-transition.opacity @click="open = false" x-cloak></div>
+
+    <!-- Slide-in Sidebar Menu -->
+    <aside :class="open ? 'sidebar-menu sidebar-menu-open' : 'sidebar-menu sidebar-menu-closed'" x-cloak>
+      <h2 class="heading-3 pb-4">Components</h2>
+      <ul class="flex flex-col gap-4">
+        <li><a href="#" class="navbar-link" @click="open = false">Home</a></li>
+        <li><a href="#" class="navbar-link" @click="open = false">About</a></li>
+        <li><a href="#" class="navbar-link" @click="open = false">Contact</a></li>
+      </ul>
+    </aside>
+  </nav>
+
+
+
+  <!-- Hero Section -->
+  <header class="text-center py-12 relative zigzag-bg">
+    <div class="decorative-corner-triangle"></div>
+    <h2 class="hero-title">Components</h2>
+    <div class="decorative-line mx-auto"></div>
+    <p class="hero-subtitle dotted-underline inline-block mt-4">Components</p>
+  </header>
+
+  <!-- Buttons -->
+  <section class="px-6 py-4">
+    <h3 class="section-title">Buttons</h3>
+    <div class="decorative-line"></div>
+    <div class="flex flex-wrap gap-4">
+      <button class="primary-button">Primary</button>
+      <button class="secondary-button">Secondary</button>
+      <button class="accent-button">Accent</button>
+      <button class="disabled-button" disabled>Disabled</button>
+      <button class="outline-button">Outline</button>
+    </div>
+  </section>
+
+  <!-- Cards -->
+  <section class="px-6 py-8">
+    <h3 class="section-title-lg">Cards</h3>
+    <div class="decorative-line"></div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Card 1 -->
+      <div class="card">
+        <span class="decorative-circle absolute top-4 right-4"></span>
+        <h4 class="card-title">Card One</h4>
+        <p class="card-text">This is a simple card with some text inside.</p>
+        <button class="accent-button">Action</button>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card">
+        <div class="decorative-corner-triangle"></div>
+        <h4 class="card-title">Card Two</h4>
+        <p class="card-text">Another card with accent color and some more content.</p>
+        <button class="primary-button">Details</button>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card">
+        <span class="decorative-circle absolute top-4 right-4"></span>
+        <h4 class="card-title">Card Three</h4>
+        <p class="card-text">Use this card for any purpose you like.</p>
+        <button class="secondary-button">Read More</button>
+      </div>
+
+      <!-- Card: Image Only -->
+      <div class="card overflow-hidden">
+        <div class="decorative-corner-triangle"></div>
+        <img src="https://via.placeholder.com/400x200" alt="Image only" class="card-image">
+      </div>
+
+      <!-- Card: Image + Text -->
+      <div class="card">
+        <span class="decorative-circle absolute top-4 right-4"></span>
+        <img src="https://via.placeholder.com/400x200" alt="Image with text" class="card-image">
+        <div class="card-body">
+          <h4 class="card-title">Image + Text</h4>
+          <p class="card-text">A card showing an image followed by text.</p>
+        </div>
+      </div>
+
+      <!-- Card: Text Only -->
+      <div class="card">
+        <div class="decorative-corner-triangle"></div>
+        <h4 class="card-title">Text Only</h4>
+        <p class="card-text">Just a block of text in a card component with no images or buttons.</p>
+      </div>
+
+      <!-- Expandable Card -->
+      <div x-data="{ open: false }" class="expandable-card">
+        <div class="card">
+          <h4 class="card-title">Expandable Card</h4>
+          <p class="card-text overflow-hidden max-h-32">
+            Lorem ipsum dolor sit amet...
+          </p>
+          <button @click="open = true" class="accent-button mt-2">See more</button>
+        </div>
+
+        <!-- Popup Overlay -->
+        <div x-show="open" x-transition class="expandable-overlay">
+          <div @click.away="open = false" class="expandable-popup">
+            <div class="decorative-line mb-4"></div>
+            <h4 class="text-2xl font-bold mb-4">Expanded Content</h4>
+            <p class="text-gray-700 mb-4">Lorem ipsum dolor sit amet Lorem ipsum, d
+              olor sit amet consectetur adipisicing elit. Deserunt alias fuga in corporis
+              voluptate vero ullam nemo illo iure veniam, ut voluptatum aliquid nisi incidunt
+              inventore quae nesciunt temporibus doloremque!</p>
+            <button @click="open = false" class="primary-button">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form Elements -->
+  <section class="px-6 py-8">
+    <h3 class="section-title">Form Elements</h3>
+    <div class="decorative-line"></div>
+    <form class="form-grid">
+      <div>
+        <label class="form-label">Name</label>
+        <input type="text" class="form-input" placeholder="Your name" />
+      </div>
+      <div>
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" placeholder="you@example.com" />
+      </div>
+      <div>
+        <label class="form-label">Message</label>
+        <textarea class="form-textarea" rows="4" placeholder="Write something..."></textarea>
+      </div>
+      <div>
+        <label class="form-label">Options</label>
+        <select class="form-select">
+          <option>Choose one</option>
+          <option>Option 1</option>
+          <option>Option 2</option>
+        </select>
+      </div>
+      <div class="flex gap-4 items-center">
+        <label class="flex items-center gap-2 form-radio-option">
+          <input type="checkbox" class="form-checkbox" />
+          <span>Subscribe</span>
+        </label>
+        <label class="flex items-center gap-2 form-radio-option">
+          <input type="radio" name="choice" class="form-radio" />
+          <span>Yes</span>
+        </label>
+        <label class="flex items-center gap-2 form-radio-option">
+          <input type="radio" name="choice" class="form-radio" />
+          <span>No</span>
+        </label>
+      </div>
+      <button class="form-button">Submit</button>
+    </form>
+  </section>
+
+  <!-- Typography & Lists -->
+  <section class="px-6 py-8 shadow-accent">
+    <h3 class="section-title">Text & Lists</h3>
+    <div class="decorative-line"></div>
+    <h1 class="heading-1">Heading 1</h1>
+    <h2 class="heading-2">Heading 2</h2>
+    <h3 class="heading-3">Heading 3</h3>
+    <p class="text-secondary">
+      This is a paragraph demonstrating the secondary text color...
+    </p>
+    <ul class="list-ul">
+      <li>First item</li>
+      <li>Second item</li>
+      <li>Third item</li>
+    </ul>
+    <ol class="list-ol">
+      <li>Step one</li>
+      <li>Step two</li>
+      <li>Step three</li>
+    </ol>
+  </section>
+
+  <!-- Table -->
+  <section class="px-6 py-8">
+    <h3 class="section-title">Table</h3>
+    <div class="decorative-line"></div>
+    <table class="table accent-top-border">
+      <thead class="table-head">
+        <tr>
+          <th class="table-cell">Name</th>
+          <th class="table-cell">Email</th>
+          <th class="table-cell">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="table-cell">Alice</td>
+          <td class="table-cell">alice@example.com</td>
+          <td class="table-cell status-active">Active</td>
+        </tr>
+        <tr class="table-row-alt">
+          <td class="table-cell">Bob</td>
+          <td class="table-cell">bob@example.com</td>
+          <td class="table-cell status-inactive">Inactive</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer accent-top-border">
+    <div class="footer-text">&copy; 2025 Brand. All rights reserved.</div>
+  </footer>
+</body>
+
+
+</html>
