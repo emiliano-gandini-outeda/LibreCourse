@@ -52,18 +52,11 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    # Fucking TailwindCSS (29834723478923 tries to install it, my npx was broken lol)
-    'tailwind',
-    'theme',
     #Apps
     'courses',
     'users',
 
 ]
-
-NPM_BIN_PATH = r"C:\Program Files\nodejs\npm.cmd" # I hate Node
-
-TAILWIND_APP_NAME = 'theme'
 
 INTERNAL_IPS = [
     "127.0.0.1",
