@@ -75,9 +75,11 @@ MIDDLEWARE = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",  # default
-    "allauth.account.auth_backends.AuthenticationBackend",  # allauth
+    "users.backends.EmailUsernameBackend",  # custom backend first
+    "allauth.account.auth_backends.AuthenticationBackend",  # allauth fallback (for signup, social)
+    "django.contrib.auth.backends.ModelBackend",  # for admin
 ]
+
 
 ROOT_URLCONF = 'CourseTrackr.urls'
 
@@ -156,7 +158,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Allauth settings
-ACCOUNT_LOGIN_METHODS = {'username', 'email'}
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = "none"
 LOGIN_REDIRECT_URL = reverse_lazy("/")
@@ -164,7 +166,9 @@ LOGIN_REDIRECT_URL = reverse_lazy("/")
 AUTH_USER_MODEL = "users.CustomUser"
 
 ACCOUNT_FORMS = {
-    "signup": "users.forms.CustomSignupForm"
+    "login": "users.forms.EmailUsernameLoginForm",
+    "signup": "users.forms.CustomSignupForm",
 }
+
 
 SITE_ID = 1
