@@ -72,6 +72,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
 ]
 
 AUTHENTICATION_BACKENDS = [

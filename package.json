@@ -1,7 +1,11 @@
 {
+  "scripts": {
+    "build": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css",
+    "watch": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch"
+  },
   "devDependencies": {
+    "tailwindcss": "^4.1.12",
     "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.12"
+    "postcss": "^8.5.6"
   }
 }
