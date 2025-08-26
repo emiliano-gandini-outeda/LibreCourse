@@ -1,5 +1,10 @@
 {
   "build": {
+    "builder": "heroku/buildpacks:20",
+    "buildpacks": [
+      { "url": "heroku/nodejs" },
+      { "url": "heroku/python" }
+    ],
     "commands": [
       "npm install",
       "npm run build",
