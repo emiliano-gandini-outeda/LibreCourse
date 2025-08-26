@@ -13,7 +13,3 @@ def user_list(request):
 def user_details(request, id):
     user = get_object_or_404(User, id = id)
     return render(request, "users/user_details.html", {"user" : user})
-
-def form_invalid(self, form):
-    print("Form errors:", form.errors)
-    return super().form_invalid(form)
