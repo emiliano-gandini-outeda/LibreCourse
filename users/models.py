@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 
 class CustomUserManager(BaseUserManager):
@@ -48,9 +49,20 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ["username"]
 
     objects = CustomUserManager() 
+    @property
     def display_name(self):
         return f"{self.username}#{self.id}"
 
 
     def __str__(self):
         return self.email or f"User {self.pk}"
+
+    @classmethod
+    def find_by_email(cls, email):
+        return cls.objects.filter(email__iexact = email).first()
+    
+    def save(self, *args, **kwargs):
+        self.email = self.email.lower
+        super().save(*args, **kwargs)
+        
+
