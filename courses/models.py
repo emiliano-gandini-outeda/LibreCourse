@@ -29,9 +29,14 @@ class Lesson(models.Model):
     content = models.TextField(_("lesson_contents"))
     course = models.ForeignKey(Course, verbose_name=_("lessons"), on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    order = models.PositiveIntegerField()
-    class Meta:
-        ordering = ["order"]
+    order = models.PositiveIntegerField(blank=True, null=True)
+    
+    def save(self, *args, **kwargs):
+        # Only assign automatically if no order is set
+        if self.order is None:
+            max_order = Lesson.objects.filter(course=self.course).aggregate(Max("order"))["order__max"]
+            self.order = (max_order or 0) + 1
+        super().save(*args, **kwargs)
 
 @receiver([post_save, post_delete], sender=Lesson)
 def update_course_timestamp(sender, instance, **kwargs):
