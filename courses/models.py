@@ -17,7 +17,8 @@ class Course(models.Model):
     creator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="created_courses")
     status = models.CharField(max_length=15, choices=[("pub", "Public"), ("priv", "Private"), ("dra", "Draft")])
     updated_at = models.DateTimeField(auto_now=True)
-    tags = tags = models.ManyToManyField(Tag, blank=True, related_name="courses")
+    tags = models.ManyToManyField(Tag, blank=True, related_name="courses")
+    collaborators = models.ManyToManyField(CustomUser, blank=True, related_name="collaborating_courses")
     def __str__(self):
         return f"#{self.id} : {self.title}"
     
