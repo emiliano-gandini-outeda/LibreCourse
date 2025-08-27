@@ -18,7 +18,10 @@ class Course(models.Model):
     status = models.CharField(max_length=15, choices=[("pub", "Public"), ("priv", "Private"), ("dra", "Draft")])
     updated_at = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag, blank=True, related_name="courses")
+    favorites = models.ManyToManyField(CustomUser, blank=True, related_name="favorite_courses")
     collaborators = models.ManyToManyField(CustomUser, blank=True, related_name="collaborating_courses")
     def __str__(self):
-        return f"#{self.id} : {self.title}"
+        return f"{self.title} #{self.id}"
     
+class Lesson(models.Model):
+    title = models.CharField(max_length=30)
