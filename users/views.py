@@ -1,77 +1,82 @@
-from django.http import HttpResponse, JsonResponse
-from users.models import User
-import json
-from django.shortcuts import render, get_object_or_404
-from django.utils.translation import gettext_lazy as _
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-
-# Create your views here.
-
-def password_valid(password):
-    special_chars = "!@#$%^&*()-_+="
-
-    if len(password) < 8:
-        return False, "Password must be at least 8 characters"
-    if not any(c.isdigit() for c in password):
-        return False, "Password must include a number"
-    if not any(c.isalpha() for c in password):
-        return False, "Password must include a letter"
-    if not any(c in special_chars for c in password):
-        return False, "Password must include a special character"
-
-    return True, ""
+from .models import User
+from .forms import SignupForm, LoginForm
 
 
 def signup_view(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request method"}, status=400)
-
-    email = request.POST.get("email")
-    password = request.POST.get("password").strip()
-
-    if not email or not password:
-        return JsonResponse({"error": "Email and password are required"})
-
-    try:
-        validate_email(email)
-    except ValidationError:
-        return JsonResponse({"error": "Email is not valid"})
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            # Create user with cleaned data
+            email = form.cleaned_data['email']
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            
+            user = User.objects.create_user(
+                email=email, 
+                username=username, 
+                password=password
+            )
+            
+            login(request, user)
+            
+            return JsonResponse({
+                "success": True,
+                "message": f"User {user.username} created successfully!"
+            })
+        else:
+            return JsonResponse({
+                "success": False,
+                "errors": form.errors
+            }, status=400)
     
-    is_valid, msg = password_valid(password)
-    
-    if not is_valid:
-        return JsonResponse({"error": msg})
-    
-    else:
-        username = request.POST.get("username")
-        user = User.objects.create_user(email=email, username=username, password=password)
-        return JsonResponse({"success": f"User {user.username} created!"})
+    return JsonResponse({
+        "error": "Invalid request method. Use POST."
+    }, status=400)
 
 def login_view(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request method"}, status = 400)
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            
+            user = authenticate(request, email=email, password=password)
+            
+            if user is not None:
+                login(request, user)
+                return JsonResponse({
+                    "success": True,
+                    "message": f"Welcome back, {user.username}!"
+                })
+            else:
+                return JsonResponse({
+                    "success": False,
+                    "errors": {"__all__": ["Invalid email or password"]}
+                }, status=401)
+        else:
+            return JsonResponse({
+                "success": False,
+                "errors": form.errors
+            }, status=400)
     
-    email = request.POST.get("email")
-    password = request.POST.get("password")
-
-    user = authenticate(request, email = email, password = password)
-
-    if user is None:
-        return JsonResponse({"error": "Invalid email or password"}, status=401)
-
-    login(request, user)
-    return JsonResponse({"message": f"Welcome, {user.username}!"})
-
-
+    return JsonResponse({
+        "error": "Invalid request method. Use POST."
+    }, status=400)
 
 def logout_view(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request method"}, status=400)
-
-    logout(request)
-    return JsonResponse({"message": "You have been logged out successfully."})
+    if request.method == "POST":
+        logout(request)
+        return JsonResponse({
+            "success": True,
+            "message": "You have been logged out successfully."
+        })
+    
+    return JsonResponse({
+        "error": "Invalid request method. Use POST."
+    }, status=400)
 
 def listUsers(request):
     users = User.objects.all()
