@@ -1,4 +1,4 @@
-import environ
+from dotenv import load_dotenv
 from pathlib import Path
 import os
 from django.urls import reverse_lazy
@@ -6,8 +6,7 @@ from django.urls import reverse_lazy
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Setup environment loading from .env
-env = environ.Env()
-env.read_env(BASE_DIR / ".env")
+load_dotenv()
 
 """
 Django settings for CourseTrackr project.
@@ -36,7 +35,7 @@ SECRET_KEY = 'django-insecure-#k^n@^qs_g-$m#j^$^#*gqz4-rt1w16#$rl@4*pbi-@h#dndp+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["coursetrackr-production-dc46.up.railway.app", env("LOCAL_HOST", default="localhost"), "127.0.0.1" ]
+ALLOWED_HOSTS = [os.getenv("LOCAL_HOST"), "127.0.0.1" ]
 
 
 # Application definition
@@ -48,10 +47,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # allauth core
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
     #Apps
     'courses',
     'users',
@@ -71,14 +66,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
 
 ]
 
 AUTHENTICATION_BACKENDS = [
-    "users.backends.EmailUsernameBackend",  # custom backend first
-    "allauth.account.auth_backends.AuthenticationBackend",  # allauth fallback (for signup, social)
     "django.contrib.auth.backends.ModelBackend",  # for admin
 ]
 
@@ -107,8 +99,14 @@ WSGI_APPLICATION = 'CourseTrackr.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': env.db() # uses DATABASE_URL
-    
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+    }
 }
 
 CSRF_TRUSTED_ORIGINS = [
@@ -124,6 +122,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -159,18 +160,16 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Allauth settings
-ACCOUNT_LOGIN_METHODS = {'email', 'username'}
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
-ACCOUNT_EMAIL_VERIFICATION = "none"
-LOGIN_REDIRECT_URL = reverse_lazy("/")
+# Login/Logout URLs
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
-AUTH_USER_MODEL = "users.CustomUser"
+# Session settings
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_SAVE_EVERY_REQUEST = True
 
-ACCOUNT_FORMS = {
-    "login": "users.forms.EmailUsernameLoginForm",
-    "signup": "users.forms.CustomSignupForm",
-}
-
+# Email backend (for password resets)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 SITE_ID = 1
