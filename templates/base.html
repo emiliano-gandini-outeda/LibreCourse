@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +23,7 @@
             <!-- Brand/Logo -->
             <div class="navbar-brand">
                 <a href="{% url 'home' %}" class="flex items-center space-x-3">
-                    <img src="static/images/CourseTrackr-icon.png" alt="CourseTrackr Logo" class="w-8 h-8">
+                    <img src="{% static 'images/CourseTrackr-icon.png' %}" alt="CourseTrackr Logo" class="w-8 h-8">
                     <span class="text-xl font-bold">CourseTrackr</span>
                 </a>
             </div>
