@@ -1,9 +1,5 @@
 # Core
 Django>=5.0,<6.0
-gunicorn>=21.2
-
-# Authentication
-django-allauth>=0.61
 
 # Tailwind integration helpers
 django-browser-reload>=1.8.0
