@@ -33,7 +33,7 @@ def signup_view(request):
             }, status=400)
         
     form = SignupForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'users/signup.html', {'form': form})
 
 
 def login_view(request):
@@ -63,7 +63,7 @@ def login_view(request):
             }, status=400)
     
     form = LoginForm()
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'users/login.html', {'form': form})
 
 def logout_view(request):
     if request.method == "POST":
@@ -79,8 +79,8 @@ def logout_view(request):
 
 def listUsers(request):
     users = User.objects.all()
-    return render(request, "users.html", {"users" : users})
+    return render(request, "users/users.html", {"users" : users})
 
 def userDetails(request, user_id):
     user = get_object_or_404(User, id = user_id)
-    return render(request, "user-details.html", {"user" : user})
+    return render(request, "users/user-details.html", {"user" : user})
