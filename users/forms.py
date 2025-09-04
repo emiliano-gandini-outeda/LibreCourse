@@ -2,19 +2,17 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import User
 
-def password_valid(password):
+def validate_password(password):
     special_chars = "!@#$%^&*()-_+="
 
     if len(password) < 8:
-        return False, "Password must be at least 8 characters"
+        raise ValidationError("Password must be at least 8 characters")
     if not any(c.isdigit() for c in password):
-        return False, "Password must include a number"
+        raise ValidationError("Password must include a number")
     if not any(c.isalpha() for c in password):
-        return False, "Password must include a letter"
+        raise ValidationError("Password must include a letter")
     if not any(c in special_chars for c in password):
-        return False, "Password must include a special character"
-
-    return True, ""
+        raise ValidationError("Password must include a special character")
 
 class SignupForm(forms.Form):
     email = forms.EmailField(
@@ -53,9 +51,7 @@ class SignupForm(forms.Form):
 
     def clean_password(self):
         password = self.cleaned_data.get('password')
-        is_valid, msg = password_valid(password)
-        if not is_valid:
-            raise ValidationError(msg)
+        validate_password(password)  # This will raise ValidationError
         return password
 
     def clean(self):
