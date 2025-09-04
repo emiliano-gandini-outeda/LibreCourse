@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from pathlib import Path
 import os
+from urllib.parse import urlparse
 from django.urls import reverse_lazy
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -98,16 +99,34 @@ WSGI_APPLICATION = 'CourseTrackr.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+if DATABASE_URL:
+    
+    parsed_url = urlparse(DATABASE_URL)
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': parsed_url.path[1:],  # Remove the leading slash
+            'USER': parsed_url.username,
+            'PASSWORD': parsed_url.password,
+            'HOST': parsed_url.hostname,
+            'PORT': parsed_url.port,
+            'OPTIONS': {
+                'sslmode': 'require',  # Required for Railway
+            },
+        }
     }
-}
+else:
+    # Fallback for local development (if needed)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'db.sqlite3',
+        }
+    }
 
 CSRF_TRUSTED_ORIGINS = [
     'https://coursetrackr-production-dc46.up.railway.app'

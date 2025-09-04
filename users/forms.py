@@ -1,7 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import User
-from .utils import password_valid  # You'll need to move your password_valid function
 
 class SignupForm(forms.Form):
     email = forms.EmailField(
