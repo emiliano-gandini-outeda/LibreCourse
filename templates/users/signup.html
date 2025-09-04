@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 
 {% block content %}
 
@@ -7,21 +8,32 @@
 <form action="POST" class="form-grid">
 
     {% csrf_token %} 
+
+    {% comment %} Form Title {% endcomment %}
+
+    <div class="container ">
+        <p class="section-header">Sign Up</p>
+        <div class="gradient-line"></div>
+    </div>
+
     
     {% comment %} Form errors {% endcomment %}
 
     {% if form.errors %}
-    
-        <div class="text-secondary">Please correct the following errors:</div>
-        {{form.non_field_errors}} 
+        <div>
+            <div class="text-secondary">Please correct the following errors:</div>
+            <p class="text-secondary">{{form.non_field_errors}}</p> 
+        </div>
+
     
     {% endif %}
 
     {% comment %} Username {% endcomment %}
 
-    <div>
+    <div class="container">
         <p class="form-label" for="{{form.username.id_for_label}}">Username</p>
-        {{form.username}}
+        <div class="decorative-line"></div>
+        {% render_field form.username class="form-input" %}
 
         {%if form.username.errors%}
             <p class="text-secondary">{{ form.username.errors.0 }}</p>
