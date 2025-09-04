@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+<form action="POST" class="form-grid">
+
+    {% csrf_token %} 
+    
+    {% comment %} Form errors {% endcomment %}
+
+    {% if form.errors %}
+    
+        <div class="text-secondary">Please correct the following errors:</div>
+        {{form.non_field_errors}} 
+    
+    {% endif %}
+
+    {% comment %} Username {% endcomment %}
+
+    <div>
+        <p class="form-label" for="{{form.username.id_for_label}}">Username</p>
+        {{form.username}}
+
+        {%if form.username.errors%}
+            <p class="text-secondary">{{ form.username.errors.0 }}</p>
+        {%endif%}
+
+        <p class="text-secondary">Required. 45 characters or fewer. Letters, digits and @/./+/-/_ only.</p>
+    </div>
+    
+</form>
+
+</div>
+{% endblock %}
