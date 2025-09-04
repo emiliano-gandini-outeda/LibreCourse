@@ -31,10 +31,10 @@ def signup_view(request):
                 "success": False,
                 "errors": form.errors
             }, status=400)
-    
-    return JsonResponse({
-        "error": "Invalid request method. Use POST."
-    }, status=400)
+        
+    form = SignupForm()
+    return render(request, 'signup.html', {'form': form})
+
 
 def login_view(request):
     if request.method == "POST":
@@ -62,9 +62,8 @@ def login_view(request):
                 "errors": form.errors
             }, status=400)
     
-    return JsonResponse({
-        "error": "Invalid request method. Use POST."
-    }, status=400)
+    form = LoginForm()
+    return render(request, 'login.html', {'form': form})
 
 def logout_view(request):
     if request.method == "POST":
