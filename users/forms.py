@@ -2,6 +2,20 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import User
 
+def password_valid(password):
+    special_chars = "!@#$%^&*()-_+="
+
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters"
+    if not any(c.isdigit() for c in password):
+        return False, "Password must include a number"
+    if not any(c.isalpha() for c in password):
+        return False, "Password must include a letter"
+    if not any(c in special_chars for c in password):
+        return False, "Password must include a special character"
+
+    return True, ""
+
 class SignupForm(forms.Form):
     email = forms.EmailField(
         max_length=254,
