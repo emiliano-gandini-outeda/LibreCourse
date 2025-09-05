@@ -10,3 +10,4 @@ __pycache__/
 *.pyc
 *.pyc
 *.pyc
+/courses/__pycache__
