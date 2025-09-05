@@ -34,7 +34,7 @@ class User(AbstractBaseUser):
 
     email =  models.EmailField(unique=True, verbose_name="Email Adress")
     username = models.CharField(max_length=45, unique = False, verbose_name="Username")
-    password = models.CharField(verbose_name="Password")
+    password = models.CharField(verbose_name="Password", max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -55,7 +55,7 @@ class User(AbstractBaseUser):
         return cls.objects.filter(email__iexact = email).first()
     
     def save(self, *args, **kwargs):
-        self.email = self.email.lower
+        self.email = self.email.lower()
         super().save(*args, **kwargs)
         
 
