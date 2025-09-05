@@ -21,20 +21,14 @@ def signup_view(request):
             )
             
             login(request, user)
-            
-            return JsonResponse({
-                "success": True,
-                "message": f"User {user.username} created successfully!"
-            })
-        else:
-            return JsonResponse({
-                "success": False,
-                "errors": form.errors
-            }, status=400)
+            return redirect('home') 
         
-    form = SignupForm()
+        # If form is invalid, fall through to render form with errors
+    
+    else:  # GET request
+        form = SignupForm()
+    
     return render(request, 'users/signup.html', {'form': form})
-
 
 def login_view(request):
     if request.method == "POST":
@@ -47,22 +41,15 @@ def login_view(request):
             
             if user is not None:
                 login(request, user)
-                return JsonResponse({
-                    "success": True,
-                    "message": f"Welcome back, {user.username}!"
-                })
+                return redirect('home') 
             else:
-                return JsonResponse({
-                    "success": False,
-                    "errors": {"__all__": ["Invalid email or password"]}
-                }, status=401)
-        else:
-            return JsonResponse({
-                "success": False,
-                "errors": form.errors
-            }, status=400)
+
+                form.add_error(None, "Invalid email or password")
+        # If form is invalid, fall through to render with errors
     
-    form = LoginForm()
+    else:  # GET request
+        form = LoginForm()
+    
     return render(request, 'users/login.html', {'form': form})
 
 def logout_view(request):
