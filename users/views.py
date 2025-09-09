@@ -53,21 +53,21 @@ def login_view(request):
     return render(request, 'users/login.html', {'form': form})
 
 def logout_view(request):
-    if request.method == "POST":
+    if request.method == "POST" or request.method == "GET":
         logout(request)
-        return JsonResponse({
-            "success": True,
-            "message": "You have been logged out successfully."
-        })
+        return redirect('home')
     
     return JsonResponse({
         "error": "Invalid request method. Use POST."
     }, status=400)
 
 def listUsers(request):
-    users = User.objects.all()
+    users = User.objects.all().order_by('id')
     return render(request, "users/users.html", {"users" : users})
 
 def userDetails(request, user_id):
     user = get_object_or_404(User, id = user_id)
     return render(request, "users/user-details.html", {"user" : user})
+
+def userProfile(request):
+    return render(request, "users/profile.html")
