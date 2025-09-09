@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<div class="container">
+
+<form method="post" class="form-grid">
+
+    {% csrf_token %} 
+
+    {% comment %} Form Title {% endcomment %}
+
+    <div class="form-field">
+        <p class="section-header">Login</p>
+    </div>
+
+    {% comment %} Form errors {% endcomment %}
+    {% if form.errors %}
+
+    <div class="error-container">
+            <div class="text-secondary">Please correct the following errors:</div>
+            <p class="text-secondary">{{form.non_field_errors}}</p> 
+        </div>
+    {% endif %}
+
+    {% comment %} Email {% endcomment %}
+
+    <div class="form-field">
+        <p class="form-label" for="{{form.email.id_for_label}}">Email</p>
+        <div class="decorative-line"></div>
+        {% render_field form.email class="form-input" %}
+    </div>
+
+    {% comment %} Password {% endcomment %}
+
+    <div class="form-field">
+        <p class="form-label" for="{{form.password.id_for_label}}">Password</p>
+        <div class="decorative-line"></div>
+        {% render_field form.password class="form-input" %}
+    </div>
+    
+    <button type="submit" class="form-button">
+        Login
+    </button>
+
+</form>
+
+</div>
+{% endblock %}
