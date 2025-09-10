@@ -5,121 +5,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}CourseTrackr - Course Management Platform{% endblock %}</title>
-    
-    <!-- Load static files -->
-    {% load static %}
+    <title>{% block title %}CourseTrackr{% endblock %}</title>
+
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
     
-    <!-- Additional CSS block for page-specific styles -->
-    {% block extra_css %}{% endblock %}
+
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <!-- Brand/Logo -->
-            <div class="navbar-brand">
-                <a href="{% url 'home' %}" class="flex items-center space-x-3">
-                    <img src="{% static 'images/CourseTrackr-icon.png' %}" alt="CourseTrackr Logo" class="w-8 h-8">
-                    <span class="text-xl font-bold">CourseTrackr</span>
-                </a>
-            </div>
-            
-            <!-- Desktop Menu -->
-            <div class="navbar-menu">
-                <a href="{% url 'home' %}" class="primary-button">Home</a>
-                <a href="" class="primary-button">Courses</a>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'courses' %}" class="primary-button">My Courses</a>
-                    <a href="{% url 'create_course' %}" class="primary-button">Create Course</a>
-                    <a href="{% url 'profile' %}" class="primary-button"> {{ user.username }}</a>
-                    <a href="{% url 'logout' %}" class="primary-button">Logout</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="primary-button">Login</a>
-                    <a href="{% url 'signup' %}" class="primary-button">Sign Up</a>
-                {% endif %}
-            </div>
-            
-            <!-- Mobile Menu Button -->
-            <div class="navbar-burger" id="navbar-burger">
-                <span class="burger-line" id="burger-top"></span>
-                <span class="burger-line" id="burger-middle"></span>
-                <span class="burger-line" id="burger-bottom"></span>
-            </div>
-        </div>
-    </nav>
-    
-    <!-- Mobile Sidebar Menu -->
-    <div class="sidebar-menu sidebar-menu-closed" id="sidebar-menu">
-        <div class="flex flex-col space-y-4 mt-8">
-            <a href="{% url 'home' %}" class="navbar-link text-lg">Home</a>
-            <a href="" class="navbar-link text-lg">Courses</a>
-            {% if user.is_authenticated %}
-                <a href="" class="navbar-link text-lg">My Courses</a>
-                <a href="" class="navbar-link text-lg">Create Course</a>
-                <a href="" class="navbar-link text-lg">Profile</a>
-                <a href="" class="navbar-link text-lg">Logout</a>
-            {% else %}
-                <a href="" class="navbar-link text-lg">Login</a>
-                <a href="" class="navbar-link text-lg">Sign Up</a>
-            {% endif %}
-        </div>
-    </div>
-    
-    <!-- Overlay for mobile menu -->
-    <div class="overlay hidden" id="overlay"></div>
     
     <!-- Main Content -->
-    <main class="container py-8">
+    <main class="">
         <!-- Page Content -->
         {% block content %}
         {% endblock %}
     </main>
     
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-text">
-            <p>&copy; {% now "Y" %} CourseTrackr. Licensed under AGPLv3.</p>
-            <p class="text-sm mt-2">Empowering educators and learners through structured course management.</p>
-        </div>
-    </footer>
-    
-    <!-- JavaScript for mobile menu -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const burger = document.getElementById('navbar-burger');
-            const sidebar = document.getElementById('sidebar-menu');
-            const overlay = document.getElementById('overlay');
-            const burgerTop = document.getElementById('burger-top');
-            const burgerMiddle = document.getElementById('burger-middle');
-            const burgerBottom = document.getElementById('burger-bottom');
-            
-            function toggleMenu() {
-                sidebar.classList.toggle('sidebar-menu-closed');
-                sidebar.classList.toggle('sidebar-menu-open');
-                overlay.classList.toggle('hidden');
-                
-                // Animate burger lines
-                burgerTop.classList.toggle('burger-top-open');
-                burgerMiddle.classList.toggle('burger-middle-open');
-                burgerBottom.classList.toggle('burger-bottom-open');
-            }
-            
-            burger.addEventListener('click', toggleMenu);
-            overlay.addEventListener('click', toggleMenu);
-            
-            // Close menu when clicking on a link
-            const sidebarLinks = sidebar.querySelectorAll('a');
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', toggleMenu);
-            });
-        });
-    </script>
-    
-    <!-- Additional JavaScript block for page-specific scripts -->
-    {% block extra_js %}{% endblock %}
+
 </body>
 </html>

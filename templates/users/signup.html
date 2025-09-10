@@ -3,79 +3,79 @@
 
 {% block content %}
 
-<div class="container">
+<div class="">
 
-<form method="post" class="form-grid">
+<form method="post" class="">
 
     {% csrf_token %} 
 
     {% comment %} Form Title {% endcomment %}
 
-    <div class="form-field">
-        <p class="section-header">Sign Up</p>
+    <div class="">
+        <p >Sign Up</p>
     </div>
 
     {% comment %} Form errors {% endcomment %}
     {% if form.errors %}
 
-    <div class="error-container">
-            <div class="text-secondary">Please correct the following errors:</div>
-            <p class="text-secondary">{{form.non_field_errors}}</p> 
+    <div class="">
+            <div class="">Please correct the following errors:</div>
+            <p class="">{{form.non_field_errors}}</p> 
         </div>
     {% endif %}
 
     {% comment %} Email {% endcomment %}
 
-    <div class="form-field">
-        <p class="form-label" for="{{form.email.id_for_label}}">Email</p>
+    <div class="">
+        <p class="" for="{{form.email.id_for_label}}">Email</p>
         <div class="decorative-line"></div>
         {% render_field form.email class="form-input" %}
 
         {%if form.email.errors%}
-            <p class="text-secondary error">{{ form.email.errors.0 }}</p>
+            <p class="">{{ form.email.errors.0 }}</p>
         {%endif%}
     </div>
 
     {% comment %} Username {% endcomment %}
 
-    <div class="form-field">
-        <p class="form-label" for="{{form.username.id_for_label}}">Username</p>
-        <div class="decorative-line"></div>
+    <div class="">
+        <p class="" for="{{form.username.id_for_label}}">Username</p>
+        <div class=""></div>
         {% render_field form.username class="form-input" %}
 
         {%if form.username.errors%}
-            <p class="text-secondary error">{{ form.username.errors.0 }}</p>
+            <p class="">{{ form.username.errors.0 }}</p>
         {%endif%}
-        <p class="text-secondary">Required. 45 characters or fewer. Letters, digits and @/./+/-/_ only.</p>
+        <p class="">Required. 45 characters or fewer. Letters, digits and @/./+/-/_ only.</p>
     </div>
 
     {% comment %} Password {% endcomment %}
 
-    <div class="form-field">
-        <p class="form-label" for="{{form.password.id_for_label}}">Password</p>
-        <div class="decorative-line"></div>
+    <div class="">
+        <p class="" for="{{form.password.id_for_label}}">Password</p>
+        <div class=""></div>
         {% render_field form.password class="form-input" %}
 
         {%if form.password.errors%}
-            <p class="text-secondary error">{{ form.password.errors.0 }}</p>
+            <p class="">{{ form.password.errors.0 }}</p>
         {%endif%}
 
-        <p class="text-secondary">Required. 8 - 30 characters. Letters, digits and @/./+/-/_ required.</p>
+        <p class="">Required. 8 - 30 characters. Letters, digits and @/./+/-/_ required.</p>
     </div>
 
     {% comment %} Password Confirmation {% endcomment %}
 
-    <div class="form-field">
-        <p class="form-label" for="{{form.password_confirm.id_for_label}}">Password Confirmation</p>
-        <div class="decorative-line"></div>
+    <div class="">
+        <p class="" for="{{form.password_confirm.id_for_label}}">Password Confirmation</p>
+        <div class=""></div>
         {% render_field form.password_confirm class="form-input" %}
 
         {%if form.password_confirm.errors%}
-            <p class="text-secondary error">{{ form.password_confirm.errors.0 }}</p>
+            <p class="">{{ form.password_confirm.errors.0 }}</p>
         {%endif%}
     </div>
     
-    <button type="submit" class="form-button">
+    <button type="submit" class="">
         Create Account
     </button>
 

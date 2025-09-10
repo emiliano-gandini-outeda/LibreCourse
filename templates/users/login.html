@@ -3,44 +3,44 @@
 
 {% block content %}
 
-<div class="container">
+<div class="">
 
-<form method="post" class="form-grid">
+<form method="post" class="">
 
     {% csrf_token %} 
 
     {% comment %} Form Title {% endcomment %}
 
-    <div class="form-field">
-        <p class="section-header">Login</p>
+    <div class="">
+        <p class="">Login</p>
     </div>
 
     {% comment %} Form errors {% endcomment %}
     {% if form.errors %}
 
-    <div class="error-container">
-            <div class="text-secondary">Please correct the following errors:</div>
-            <p class="text-secondary">{{form.non_field_errors}}</p> 
+    <div class="">
+            <div class="">Please correct the following errors:</div>
+            <p class="">{{form.non_field_errors}}</p> 
         </div>
     {% endif %}
 
     {% comment %} Email {% endcomment %}
 
-    <div class="form-field">
-        <p class="form-label" for="{{form.email.id_for_label}}">Email</p>
-        <div class="decorative-line"></div>
+    <div class="">
+        <p class="" for="{{form.email.id_for_label}}">Email</p>
+        <div class=""></div>
         {% render_field form.email class="form-input" %}
     </div>
 
     {% comment %} Password {% endcomment %}
 
-    <div class="form-field">
-        <p class="form-label" for="{{form.password.id_for_label}}">Password</p>
-        <div class="decorative-line"></div>
+    <div class="">
+        <p class="" for="{{form.password.id_for_label}}">Password</p>
+        <div class=""></div>
         {% render_field form.password class="form-input" %}
     </div>
     
-    <button type="submit" class="form-button">
+    <button type="submit" class="">
         Login
     </button>
 
