@@ -2,249 +2,69 @@
 {% load static %}
 
 {% block content %}
-
-<div class="container mx-auto px-4 py-8">
-    <h1 class="section-title-lg text-center mb-6">User Directory</h1>
+<div x-data="{ search: '' }" class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8 text-center">User Directory</h1>
     
-    <!-- Search and Filter Section - Wider design -->
-    <div class="w-full mb-6">
-        <div class="card p-5 w-full rounded-xl">
-            <form method="GET" class="flex flex-col lg:flex-row gap-4 items-center">
-                <!-- Search Input - Wider -->
-                <div class="flex-grow relative w-full lg:w-2/3">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <i class="fas fa-search text-gray-400"></i>
-                    </span>
-                    <input type="text" name="search" placeholder="Search users by name, username, or email..." 
-                           value="{{ request.GET.search }}"
-                           class="form-input pl-10 w-full rounded-lg">
-                </div>
-                
-                <!-- Results Per Page Dropdown -->
-                <div class="flex items-center gap-2 w-full lg:w-1/4">
-                    <label for="per_page" class="form-label whitespace-nowrap mb-0">Show:</label>
-                    <select name="per_page" id="per_page" 
-                            onchange="this.form.submit()"
-                            class="form-input py-2 w-20 rounded-lg">
-                        <option value="10" {% if request.GET.per_page == "10" %}selected{% endif %}>10</option>
-                        <option value="20" {% if request.GET.per_page == "20" %}selected{% endif %}>20</option>
-                        <option value="40" {% if request.GET.per_page == "40" %}selected{% endif %}>40</option>
-                        <option value="100" {% if request.GET.per_page == "100" %}selected{% endif %}>100</option>
-                    </select>
-                </div>
-                
-                <!-- Submit Button -->
-                <button type="submit" class="accent-button px-4 py-2 w-full lg:w-auto rounded-lg">
-                    Apply
-                </button>
-            </form>
-        </div>
+    <!-- Search input -->
+    <div class="mb-6">
+        <input 
+            type="text" 
+            x-model="search" 
+            placeholder="Search users..." 
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+        >
     </div>
     
-    <!-- Users Table - Excel-like design -->
-    <div class="w-full overflow-x-auto">
-        <div class="card p-0 w-full rounded-xl overflow-hidden">
-            <!-- Table Header -->
-            <div class="table-head grid grid-cols-12 gap-2 p-3 border-b" style="border-color: var(--color-borders); background-color: var(--color-dark-grey);">
-                <div class="col-span-1 text-center font-semibold">ID</div>
-                <div class="col-span-3 font-semibold">User</div>
-                <div class="col-span-3 font-semibold">Username</div>
-                <div class="col-span-2 text-center font-semibold">Courses</div>
-                <div class="col-span-2 text-center font-semibold">Enrolled</div>
-                <div class="col-span-1 text-center font-semibold">Actions</div>
+    <!-- Users grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for user in users %}
+        <div 
+            x-show="search === '' || 
+                    '{{ user.username|lower }}'.includes(search.toLowerCase()) || 
+                    '{{ user.display_name|default:""|lower }}'.includes(search.toLowerCase())"
+            class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition"
+        >
+            <!-- User profile picture -->
+            <div class="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
+                {% if user.profile.image %}
+                    <img src="{{ user.profile.image.url }}" alt="{{ user.username }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                {% endif %}
             </div>
             
-            <!-- Table Rows -->
-            <div class="divide-y" style="border-color: var(--color-borders);">
-                {% for user in users %}
-                <div class="grid grid-cols-12 gap-2 p-3 items-center hover:bg-surface-elevated transition-colors" style="background-color: {% if forloop.counter|divisibleby:2 %}var(--color-surface){% else %}var(--color-background){% endif %};">
-                    <!-- ID Column -->
-                    <div class="col-span-1 text-center text-sm" style="color: var(--color-text-secondary);">
-                        #{{ user.id }}
-                    </div>
-                    
-                    <!-- User Column -->
-                    <div class="col-span-3 flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, var(--color-dark-red), var(--color-dark-red-light));">
-                            <span class="text-xs font-bold text-white">{{ user.username|first|upper }}</span>
-                        </div>
-                        <div class="truncate">
-                            <div class="text-sm font-medium" style="color: var(--color-text-primary);">{{ user.get_full_name|default:user.username }}</div>
-                            <div class="text-xs" style="color: var(--color-text-secondary);">{{ user.email|truncatechars:20 }}</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Username Column -->
-                    <div class="col-span-3 text-sm" style="color: var(--color-text-primary);">
-                        @{{ user.username }}
-                    </div>
-                    
-                    <!-- Courses Column -->
-                    <div class="col-span-2 text-center text-sm" style="color: var(--color-text-primary);">
-                        {{ user.courses_created|default:"0" }}
-                    </div>
-                    
-                    <!-- Enrolled Column -->
-                    <div class="col-span-2 text-center text-sm" style="color: var(--color-text-primary);">
-                        {{ user.enrollments|default:"0" }}
-                    </div>
-                    
-                    <!-- Actions Column -->
-                    <div class="col-span-1 text-center">
-                        <a href="{% url 'user-details' user.id %}" class="accent-button text-xs px-2 py-1 rounded-lg inline-block">
-                            View
-                        </a>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="p-8 text-center">
-                    <i class="fas fa-users text-3xl mb-3" style="color: var(--color-text-muted);"></i>
-                    <h3 class="text-lg font-semibold" style="color: var(--color-text-primary);">No users found</h3>
-                    <p class="text-sm" style="color: var(--color-text-secondary);">Try adjusting your search criteria</p>
-                </div>
-                {% endfor %}
+            <!-- User info -->
+            <div class="p-6">
+                <h2 class="text-xl font-semibold text-gray-800">{{ user.username }}</h2>
+                <p class="text-gray-500 mb-4">{{ user.display_name }}</p>
+                
+                <!-- View profile button -->
+                <a 
+                    href="{% url 'user-details' user.id %}" 
+                    class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-medium py-2 px-4 rounded-lg transition"
+                >
+                    View Profile
+                </a>
             </div>
         </div>
+        {% endfor %}
     </div>
     
-    <!-- Pagination Controls -->
-    {% if users.has_other_pages %}
-    <div class="flex justify-center items-center gap-2 mt-6">
-        {% if users.has_previous %}
-        <a href="?page={{ users.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" 
-           class="outline-button px-3 py-1 rounded-lg text-sm">
-            <i class="fas fa-chevron-left"></i>
-        </a>
-        {% endif %}
-        
-        {% for i in users.paginator.page_range %}
-            {% if users.number == i %}
-            <span class="accent-button px-3 py-1 rounded-lg text-sm">{{ i }}</span>
-            {% else %}
-            <a href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" 
-               class="outline-button px-3 py-1 rounded-lg text-sm">{{ i }}</a>
-            {% endif %}
-        {% endfor %}
-        
-        {% if users.has_next %}
-        <a href="?page={{ users.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" 
-           class="outline-button px-3 py-1 rounded-lg text-sm">
-            <i class="fas fa-chevron-right"></i>
-        </a>
-        {% endif %}
+    <!-- No results message -->
+    <div 
+        x-show="search !== '' && Array.from(document.querySelectorAll('[x-show]')).filter(el => el.style.display !== 'none').length === 0"
+        class="text-center py-12 text-gray-500"
+    >
+        No users found matching "<span x-text="search"></span>"
     </div>
-    {% endif %}
 </div>
 
 <style>
-    /* Additional custom styles for Excel-like appearance */
-    .container {
-        max-width: 1400px;
-        display: block !important;
-    }
-    
-    /* Table row styling */
-    .divide-y > div {
-        transition: background-color 0.2s ease;
-    }
-    
-    .divide-y > div:hover {
-        background-color: var(--color-surface-elevated) !important;
-    }
-    
-    /* Ensure proper truncation for table cells */
-    .truncate {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 1024px) {
-        .grid-cols-12 {
-            grid-template-columns: repeat(8, 1fr);
-        }
-        
-        .table-head div:nth-child(1),
-        .divide-y > div > div:nth-child(1) {
-            display: none;
-        }
-        
-        .table-head div:nth-child(4),
-        .divide-y > div > div:nth-child(4),
-        .table-head div:nth-child(5),
-        .divide-y > div > div:nth-child(5) {
-            display: none;
-        }
-        
-        .table-head div {
-            grid-column: span 2;
-        }
-        
-        .divide-y > div > div {
-            grid-column: span 2;
-        }
-        
-        .table-head div:nth-child(6),
-        .divide-y > div > div:nth-child(6) {
-            grid-column: span 2;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .grid-cols-12 {
-            grid-template-columns: 1fr;
-        }
-        
-        .table-head {
-            display: none;
-        }
-        
-        .divide-y > div {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            padding: 1rem;
-        }
-        
-        .divide-y > div > div {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-        
-        .divide-y > div > div::before {
-            content: attr(data-label);
-            font-weight: 600;
-            color: var(--color-text-secondary);
-            margin-right: 1rem;
-        }
-        
-        .divide-y > div > div:nth-child(1)::before { content: "ID:"; }
-        .divide-y > div > div:nth-child(2)::before { content: "User:"; }
-        .divide-y > div > div:nth-child(3)::before { content: "Username:"; }
-        .divide-y > div > div:nth-child(4)::before { content: "Courses:"; }
-        .divide-y > div > div:nth-child(5)::before { content: "Enrolled:"; }
-        .divide-y > div > div:nth-child(6)::before { content: "Actions:"; }
-    }
+    /* Custom styles for better appearance */
+    [x-cloak] { display: none !important; }
 </style>
-
-<script>
-    // Add data labels for mobile view
-    document.addEventListener('DOMContentLoaded', function() {
-        const headers = document.querySelectorAll('.table-head > div');
-        const rows = document.querySelectorAll('.divide-y > div');
-        
-        rows.forEach(row => {
-            const cells = row.querySelectorAll('div');
-            cells.forEach((cell, index) => {
-                if (headers[index]) {
-                    cell.setAttribute('data-label', headers[index].textContent);
-                }
-            });
-        });
-    });
-</script>
-
 {% endblock %}
