@@ -65,8 +65,8 @@ def listUsers(request):
     users = User.objects.all().order_by('id')
     return render(request, "users/users.html", {"users" : users})
 
-def userDetails(request, user_id):
-    user = get_object_or_404(User, id = user_id)
+def userDetails(request, id):
+    user = get_object_or_404(User, id = id)
     return render(request, "users/user-details.html", {"user" : user})
 
 def userProfile(request):
