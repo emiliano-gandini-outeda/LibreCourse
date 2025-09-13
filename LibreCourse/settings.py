@@ -131,7 +131,7 @@ else:
     }
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://coursetrackr-production-dc46.up.railway.app'
+    
 ]
 
 # Password validation
