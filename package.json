@@ -1,7 +1,7 @@
 {
-  "name": "coursetrackr",
+  "name": "librecourse",
   "version": "1.0.0",
-  "description": "**CourseTrackr** is a full-stack Django application designed for creating, organizing, and collaborating on courses. It allows educators and learners to structure content into lessons, manage access, and engage in learning.",
+  "description": "**LibreCourse** is a full-stack Django application designed for creating, organizing, and collaborating on courses. It allows educators and learners to structure content into lessons, manage access, and engage in learning.",
   "main": "postcss.config.js",
   "dependencies": {
     "autoprefixer": "^10.4.21",
@@ -27,13 +27,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/emiliano-gandini-outeda/CourseTrackr.git"
+    "url": "git+https://github.com/emiliano-gandini-outeda/LibreCourse.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/emiliano-gandini-outeda/CourseTrackr/issues"
+    "url": "https://github.com/emiliano-gandini-outeda/LibreCourse/issues"
   }
 }
