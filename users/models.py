@@ -28,13 +28,14 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, username, password, **extra_fields)
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
     email =  models.EmailField(unique=True, verbose_name="Email Adress")
     username = models.CharField(max_length=45, unique = False, verbose_name="Username")
-    password = models.CharField(verbose_name="Password", max_length=30)
+    description = models.CharField(max_length=450, verbose_name="Description", null=True, blank=True)
+    profile_picture = models.URLField(max_length=450, null=True, blank=True, verbose_name="Profile Picture URL")
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
