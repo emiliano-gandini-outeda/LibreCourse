@@ -1,5 +1,5 @@
 """
-WSGI config for CourseTrackr project.
+WSGI config for LibreCourse project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CourseTrackr.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LibreCourse.settings')
 
 application = get_wsgi_application()
