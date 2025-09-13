@@ -1,6 +1,6 @@
-# 📘 CourseTrackr
+# 📘 LibreCourse
 
-**CourseTrackr** is a full-stack Django application designed for creating, organizing, and collaborating on courses.
+**LibreCourse** is a full-stack Django application designed for creating, organizing, and collaborating on courses.
 It allows educators and learners to structure content into lessons, manage access, and engage in learning.
 
 ---
@@ -51,7 +51,7 @@ It allows educators and learners to structure content into lessons, manage acces
 
 ---
 
-✨ *CourseTrackr is built to demonstrate clean Django architecture, scalability, and real-world feature planning.*
+✨ *LibreCourse is built to demonstrate clean Django architecture, scalability, and real-world feature planning.*
 
 ---
 
