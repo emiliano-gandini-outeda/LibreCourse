@@ -75,3 +75,7 @@ class LoginForm(forms.Form):
             'class': 'form-control'
         })
     )
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["username", "description", "profile_picture", "email"]
