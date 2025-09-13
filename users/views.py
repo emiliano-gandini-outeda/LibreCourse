@@ -1,8 +1,10 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from .models import User
-from .forms import SignupForm, LoginForm
+from .forms import SignupForm, LoginForm, UserUpdateForm
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.decorators import login_required
 
 
 def signup_view(request):
@@ -69,5 +71,32 @@ def userDetails(request, id):
     user = get_object_or_404(User, id = id)
     return render(request, "users/user-details.html", {"user" : user})
 
+
+@login_required
 def userProfile(request):
-    return render(request, "users/profile.html")
+    return render(request, "users/profile.html", {"user": request.user})
+
+@login_required
+def change_password(request):
+    if request.method == "POST":
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # keep user logged in
+            return redirect("profile")
+    else:
+        form = PasswordChangeForm(request.user)
+    
+    return render(request, "users/change_password.html", {"form": form})
+
+@login_required
+def update_profile(request):
+    if request.method == "POST":
+        form = UserUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect("profile")  # or wherever you want
+    else:
+        form = UserUpdateForm(instance=request.user)
+    
+    return render(request, "users/update_profile.html", {"form": form})
