@@ -4,6 +4,7 @@ import subprocess
 import sys
 import platform
 import shutil
+import socket
 
 # -------------------- CONFIG --------------------
 PY_DEPS = [
@@ -15,6 +16,7 @@ PY_DEPS = [
 ]
 
 TAILWIND_CMD = [
+    "npx",
     "tailwindcss",
     "-i", "static/css/input.css",
     "-o", "static/css/output.css",
@@ -30,6 +32,7 @@ ICONS = {
 }
 
 VENV_PATH = ".venv"
+DJANGO_PORT = 8000
 
 # -------------------- UTILS --------------------
 def run_cmd(cmd, check=True, env=None):
@@ -79,10 +82,9 @@ def install_venv_package(os_type):
 
 def ensure_venv():
     os_type = detect_os()
-
-    # Verifica si el paquete venv funciona
     try:
         import venv
+        # Test if venv works
         test_path = ".venv_test"
         subprocess.run([sys.executable, "-m", "venv", test_path], check=True)
         shutil.rmtree(test_path)
@@ -93,7 +95,7 @@ def ensure_venv():
         print_status("Creating virtual environment...", icon="⚡")
         subprocess.run([sys.executable, "-m", "venv", VENV_PATH], check=True)
 
-    # Asegurar pip
+    # Ensure pip exists
     python_bin = get_python_bin()
     try:
         run_cmd([python_bin, "-m", "pip", "--version"])
@@ -101,21 +103,17 @@ def ensure_venv():
         print_status("pip not found in venv. Installing pip...", icon="⚡")
         run_cmd([python_bin, "-m", "ensurepip", "--upgrade"])
 
-
-
-
 def get_python_bin():
     return os.path.join(VENV_PATH, "Scripts" if platform.system() == "Windows" else "bin", "python")
 
 def install_python_deps():
-    print_status("Installing Python dependencies from requirements.txt...", icon="🐍")
+    print_status("Installing Python dependencies...", icon="🐍")
     python_bin = get_python_bin()
     run_cmd([python_bin, "-m", "pip", "install", "--upgrade", "pip"])
     if os.path.exists("requirements.txt"):
         run_cmd([python_bin, "-m", "pip", "install", "-r", "requirements.txt"])
     else:
-        print_status("requirements.txt not found!", icon="⚠")
-
+        run_cmd([python_bin, "-m", "pip", "install"] + PY_DEPS)
 
 # -------------------- NPM / TAILWIND --------------------
 def install_npm(os_type):
@@ -140,6 +138,7 @@ def ensure_npm_tailwind():
     if not shutil.which("npm") or not shutil.which("npx"):
         os_type = detect_os()
         install_npm(os_type)
+    # Tailwind via npx, no global install needed
 
 def install_npm_deps():
     if os.path.exists("package.json"):
@@ -147,10 +146,19 @@ def install_npm_deps():
         run_cmd(["npm", "install"])
 
 # -------------------- SERVERS --------------------
+def find_free_port(start_port):
+    port = start_port
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if s.connect_ex(('localhost', port)) != 0:
+                return port
+        port += 1
+
 def run_servers():
     print_status("Starting Django and Tailwind servers...", icon="🚀")
     python_bin = get_python_bin()
-    django_proc = subprocess.Popen([python_bin, "manage.py", "runserver"])
+    port = find_free_port(DJANGO_PORT)
+    django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", str(port)])
     tailwind_proc = subprocess.Popen(TAILWIND_CMD)
 
     try:
@@ -165,25 +173,18 @@ def run_servers():
 def run_migrations():
     print_status("Checking for pending migrations...", icon="🗄️")
     python_bin = get_python_bin()
-
-    # Check if there are unapplied migrations
     result = subprocess.run(
         [python_bin, "manage.py", "showmigrations", "--plan"],
         capture_output=True,
         text=True,
     )
-
-    pending = any(
-        line.strip().startswith("[ ]") for line in result.stdout.splitlines()
-    )
-
+    pending = any(line.strip().startswith("[ ]") for line in result.stdout.splitlines())
     if pending:
         print_status("Applying Django migrations...", icon="🗄️")
         run_cmd([python_bin, "manage.py", "makemigrations"])
         run_cmd([python_bin, "manage.py", "migrate"])
     else:
         print_status("No migrations to apply.", icon="✅")
-
 
 # -------------------- MAIN --------------------
 def main():
