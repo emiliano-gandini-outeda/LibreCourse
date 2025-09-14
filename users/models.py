@@ -32,7 +32,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    email =  models.EmailField(unique=True, verbose_name="Email Adress")
+    email =  models.EmailField(unique=True, verbose_name="Email Address")
     username = models.CharField(max_length=45, unique = False, verbose_name="Username")
     description = models.CharField(max_length=450, verbose_name="Description", null=True, blank=True)
     profile_picture = models.URLField(max_length=450, null=True, blank=True, verbose_name="Profile Picture URL")
