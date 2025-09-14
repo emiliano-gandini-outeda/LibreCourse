@@ -148,7 +148,7 @@ def ensure_curl(os_type):
     print_status("curl not found. Installing...", ICONS["Action"], color="cyan")
     try:
         if os_type in ["Ubuntu", "Debian"]:
-            run_cmd(["sudo", "apt", "update"])
+            run_cmd(["sudo", "apt", "update", "--allow-releaseinfo-change"])
             run_cmd(["sudo", "apt", "install", "-y", "curl"])
         elif os_type == "Arch":
             run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "curl"])
