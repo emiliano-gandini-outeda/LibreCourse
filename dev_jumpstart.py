@@ -88,6 +88,15 @@ def ensure_venv():
         print_status("Creating virtual environment...", icon="⚡")
         subprocess.run([sys.executable, "-m", "venv", VENV_PATH], check=True)
 
+    # Asegurarse de que pip esté disponible en el venv
+    python_bin = get_python_bin()
+    try:
+        run_cmd([python_bin, "-m", "pip", "--version"])
+    except subprocess.CalledProcessError:
+        print_status("pip not found in venv. Installing pip...", icon="⚡")
+        run_cmd([python_bin, "-m", "ensurepip", "--upgrade"])
+
+
 
 def get_python_bin():
     return os.path.join(VENV_PATH, "Scripts" if platform.system() == "Windows" else "bin", "python")
