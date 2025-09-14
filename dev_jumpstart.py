@@ -128,10 +128,17 @@ def ensure_npm_tailwind():
     if not shutil.which("npm") or not shutil.which("npx"):
         os_type = detect_os()
         install_npm(os_type)
-    # Ensure Tailwind is installed
-    if not os.path.exists("node_modules/.bin/tailwindcss"):
-        print_status("TailwindCSS not found. Installing...", icon="⚡")
-        run_cmd("npm install")
+
+    # Always install devDependencies
+    print_status("Installing npm dependencies including TailwindCSS...", icon="⚡")
+    run_cmd("npm install --include=dev")
+    
+    # Verify tailwind binary exists
+    tailwind_bin = os.path.join("node_modules", ".bin", "tailwindcss")
+    if not os.path.exists(tailwind_bin):
+        print_status("TailwindCSS binary still not found after npm install!", icon="⚠")
+        sys.exit(1)
+
 
 def install_npm_deps():
     if os.path.exists("package.json"):
