@@ -15,13 +15,8 @@ PY_DEPS = [
     "whitenoise>=6.4",
 ]
 
-TAILWIND_CMD = [
-    "npx",
-    "tailwindcss",
-    "-i", "static/css/input.css",
-    "-o", "static/css/output.css",
-    "--watch"
-]
+VENV_PATH = ".venv"
+DJANGO_PORT = 8000
 
 ICONS = {
     "Arch": "",
@@ -31,13 +26,10 @@ ICONS = {
     "Linux": "",
 }
 
-VENV_PATH = ".venv"
-DJANGO_PORT = 8000
-
 # -------------------- UTILS --------------------
 def run_cmd(cmd, check=True, env=None):
-    print(f"> {' '.join(cmd)}")
-    subprocess.run(cmd, check=check, env=env)
+    print(f"> {' '.join(cmd) if isinstance(cmd, list) else cmd}")
+    subprocess.run(cmd, check=check, env=env, shell=isinstance(cmd, str))
 
 def detect_os():
     sys_platform = platform.system().lower()
@@ -65,7 +57,7 @@ def print_status(msg, icon=""):
 
 # -------------------- VENV / PYTHON --------------------
 def install_venv_package(os_type):
-    print_status("Virtualenv module not found or venv unusable. Installing system package...", icon="⚡")
+    print_status("venv module not found or unusable. Installing system package...", icon="⚡")
     try:
         if os_type in ["Ubuntu", "Debian"]:
             run_cmd(["sudo", "apt", "update"])
@@ -84,7 +76,6 @@ def ensure_venv():
     os_type = detect_os()
     try:
         import venv
-        # Test if venv works
         test_path = ".venv_test"
         subprocess.run([sys.executable, "-m", "venv", test_path], check=True)
         shutil.rmtree(test_path)
@@ -95,7 +86,6 @@ def ensure_venv():
         print_status("Creating virtual environment...", icon="⚡")
         subprocess.run([sys.executable, "-m", "venv", VENV_PATH], check=True)
 
-    # Ensure pip exists
     python_bin = get_python_bin()
     try:
         run_cmd([python_bin, "-m", "pip", "--version"])
@@ -117,7 +107,7 @@ def install_python_deps():
 
 # -------------------- NPM / TAILWIND --------------------
 def install_npm(os_type):
-    print_status("npm/npx not found. Attempting to install...", icon="⚡")
+    print_status("npm/npx not found. Installing...", icon="⚡")
     try:
         if os_type in ["Ubuntu", "Debian"]:
             run_cmd(["sudo", "apt", "update"])
@@ -138,12 +128,15 @@ def ensure_npm_tailwind():
     if not shutil.which("npm") or not shutil.which("npx"):
         os_type = detect_os()
         install_npm(os_type)
-    # Tailwind via npx, no global install needed
+    # Ensure Tailwind is installed
+    if not os.path.exists("node_modules/.bin/tailwindcss"):
+        print_status("TailwindCSS not found. Installing...", icon="⚡")
+        run_cmd("npm install")
 
 def install_npm_deps():
     if os.path.exists("package.json"):
         print_status("Installing npm dependencies...", icon="📦")
-        run_cmd(["npm", "install"])
+        run_cmd("npm install")
 
 # -------------------- SERVERS --------------------
 def find_free_port(start_port):
@@ -156,10 +149,15 @@ def find_free_port(start_port):
 
 def run_servers():
     print_status("Starting Django and Tailwind servers...", icon="🚀")
+    ensure_npm_tailwind()
     python_bin = get_python_bin()
     port = find_free_port(DJANGO_PORT)
+
     django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", str(port)])
-    tailwind_proc = subprocess.Popen(TAILWIND_CMD)
+    
+    # Use shell=True for npx on Linux/Ubuntu
+    tailwind_cmd = "npx tailwindcss -i static/css/input.css -o static/css/output.css --watch"
+    tailwind_proc = subprocess.Popen(tailwind_cmd, shell=True)
 
     try:
         django_proc.wait()
