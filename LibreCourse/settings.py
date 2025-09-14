@@ -1,13 +1,9 @@
-from dotenv import load_dotenv
 from pathlib import Path
 import os
 from urllib.parse import urlparse
 from django.urls import reverse_lazy
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Setup environment loading from .env
-load_dotenv()
 
 """
 Django settings for LibreCourse project.
@@ -20,8 +16,6 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
-from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
