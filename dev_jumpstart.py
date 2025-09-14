@@ -155,9 +155,8 @@ def run_servers():
 
     django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", str(port)])
     
-    # Use shell=True for npx on Linux/Ubuntu
-    tailwind_cmd = "npx tailwindcss -i static/css/input.css -o static/css/output.css --watch"
-    tailwind_proc = subprocess.Popen(tailwind_cmd, shell=True)
+    tailwind_bin = os.path.join("node_modules", ".bin", "tailwindcss")
+    tailwind_proc = subprocess.Popen([tailwind_bin, "-i", "static/css/input.css", "-o", "static/css/output.css", "--watch"])
 
     try:
         django_proc.wait()
@@ -166,6 +165,7 @@ def run_servers():
         print_status("Stopping servers...", icon="🛑")
         django_proc.terminate()
         tailwind_proc.terminate()
+
 
 # -------------------- MIGRATIONS --------------------
 def run_migrations():
