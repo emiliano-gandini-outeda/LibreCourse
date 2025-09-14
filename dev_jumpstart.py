@@ -129,15 +129,16 @@ def ensure_npm_tailwind():
         os_type = detect_os()
         install_npm(os_type)
 
-    # Always install devDependencies
+    # Always install devDependencies including tailwind
     print_status("Installing npm dependencies including TailwindCSS...", icon="⚡")
     run_cmd("npm install --include=dev")
-    
-    # Verify tailwind binary exists
-    tailwind_bin = os.path.join("node_modules", ".bin", "tailwindcss")
-    if not os.path.exists(tailwind_bin):
-        print_status("TailwindCSS binary still not found after npm install!", icon="⚠")
+
+    # Verify tailwind via npx instead of local binary
+    result = subprocess.run("npx tailwindcss --version", shell=True, capture_output=True, text=True)
+    if result.returncode != 0:
+        print_status("TailwindCSS still not found via npx! Check npm installation.", icon="⚠")
         sys.exit(1)
+
 
 
 def install_npm_deps():
@@ -156,14 +157,14 @@ def find_free_port(start_port):
 
 def run_servers():
     print_status("Starting Django and Tailwind servers...", icon="🚀")
-    ensure_npm_tailwind()
     python_bin = get_python_bin()
     port = find_free_port(DJANGO_PORT)
 
     django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", str(port)])
-    
-    tailwind_bin = os.path.join("node_modules", ".bin", "tailwindcss")
-    tailwind_proc = subprocess.Popen([tailwind_bin, "-i", "static/css/input.css", "-o", "static/css/output.css", "--watch"])
+
+    # Use npx, shell=True works reliably on Arch and Linux
+    tailwind_cmd = "npx tailwindcss -i static/css/input.css -o static/css/output.css --watch"
+    tailwind_proc = subprocess.Popen(tailwind_cmd, shell=True)
 
     try:
         django_proc.wait()
@@ -172,6 +173,7 @@ def run_servers():
         print_status("Stopping servers...", icon="🛑")
         django_proc.terminate()
         tailwind_proc.terminate()
+
 
 
 # -------------------- MIGRATIONS --------------------
