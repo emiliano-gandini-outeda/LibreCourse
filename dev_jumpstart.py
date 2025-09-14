@@ -129,17 +129,19 @@ def ensure_npm_tailwind():
         os_type = detect_os()
         install_npm(os_type)
 
-    # Always install devDependencies including tailwind
+    # Install all dependencies including devDependencies
     print_status("Installing npm dependencies including TailwindCSS...", icon="⚡")
     run_cmd("npm install --include=dev")
 
-    # Verify tailwind via npx instead of local binary
+    # Verify tailwind via npx
     result = subprocess.run("npx tailwindcss --version", shell=True, capture_output=True, text=True)
     if result.returncode != 0:
-        print_status("TailwindCSS still not found via npx! Check npm installation.", icon="⚠")
+        print_status(
+            "TailwindCSS still not found via npx! You may need to install it globally with:\n"
+            "  npm install -g tailwindcss",
+            icon="⚠"
+        )
         sys.exit(1)
-
-
 
 def install_npm_deps():
     if os.path.exists("package.json"):
@@ -162,7 +164,7 @@ def run_servers():
 
     django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", str(port)])
 
-    # Use npx, shell=True works reliably on Arch and Linux
+    # Run Tailwind via npx
     tailwind_cmd = "npx tailwindcss -i static/css/input.css -o static/css/output.css --watch"
     tailwind_proc = subprocess.Popen(tailwind_cmd, shell=True)
 
@@ -173,8 +175,6 @@ def run_servers():
         print_status("Stopping servers...", icon="🛑")
         django_proc.terminate()
         tailwind_proc.terminate()
-
-
 
 # -------------------- MIGRATIONS --------------------
 def run_migrations():
