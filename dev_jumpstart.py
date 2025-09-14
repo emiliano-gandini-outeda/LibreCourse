@@ -106,82 +106,74 @@ def install_python_deps():
         run_cmd([python_bin, "-m", "pip", "install"] + PY_DEPS)
 
 # -------------------- NPM / NODE / TAILWIND --------------------
-def run_cmd(cmd, check=True, env=None):
-    print(f"> {' '.join(cmd) if isinstance(cmd, list) else cmd}")
-    subprocess.run(cmd, check=check, env=env, shell=isinstance(cmd, str))
+NODE_MIN_VERSION = (20, 17, 0)  # Minimum Node version for Tailwind 4
 
 def get_node_version():
     try:
         result = subprocess.run(["node", "-v"], capture_output=True, text=True)
-        if result.returncode == 0:
-            v = result.stdout.strip()
-            # remove 'v' prefix
-            return tuple(map(int, v.lstrip("v").split(".")))
+        if result.returncode != 0:
+            return None
+        version_str = result.stdout.strip().lstrip("v")
+        version_tuple = tuple(int(x) for x in version_str.split("."))
+        return version_tuple
     except FileNotFoundError:
         return None
-
-def install_node(os_type):
-    print_status("Installing Node.js and npm...", icon="⚡")
-    try:
-        if os_type in ["Ubuntu", "Debian"]:
-            # Remove old Node.js
-            run_cmd("sudo apt remove -y nodejs npm")
-            # Install via NodeSource
-            run_cmd("curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -")
-            run_cmd("sudo apt install -y nodejs")
-        elif os_type == "Arch":
-            run_cmd("sudo pacman -Rns --noconfirm nodejs npm")
-            run_cmd("sudo pacman -Syu --noconfirm nodejs npm")
-        elif os_type == "Windows":
-            print_status("Please install Node.js from https://nodejs.org/", icon="⚠")
-            sys.exit(1)
-        else:
-            print_status(f"No automatic Node.js installation method for {os_type}. Install manually.", icon="⚠")
-            sys.exit(1)
-    except subprocess.CalledProcessError:
-        print_status("Failed to install Node.js/npm. Install manually.", icon="⚠")
-        sys.exit(1)
 
 def ensure_node():
     os_type = detect_os()
     node_version = get_node_version()
-    min_versions = [(20,17,0), (22,9,0)]
-    
-    def version_ok(v):
-        return v >= min_versions[0] or v >= min_versions[1]
-
     if node_version is None:
-        print_status("Node.js not found.", icon="⚡")
+        print_status("Node.js not found. Installing...", icon="⚡")
         install_node(os_type)
-    elif not version_ok(node_version):
-        print_status(f"Node.js version too old: {'.'.join(map(str,node_version))}", icon="⚡")
-        user_input = input("Do you want to uninstall and install the latest Node.js? [y/N]: ").strip().lower()
-        if user_input == "y":
-            install_node(os_type)
-        else:
-            print_status("Cannot continue with outdated Node.js.", icon="⚠")
-            sys.exit(1)
-    
-    # Ensure npm is available
+    elif node_version < NODE_MIN_VERSION:
+        print_status(f"Node.js version too old ({'.'.join(map(str,node_version))}). Updating...", icon="⚡")
+        install_node(os_type)
+    else:
+        print_status(f"Node.js version OK ({'.'.join(map(str,node_version))})", icon="✅")
+
+    # Ensure npm exists
     if not shutil.which("npm") or not shutil.which("npx"):
-        print_status("npm or npx not found after Node.js installation.", icon="⚠")
+        print_status("npm/npx not found. Something went wrong with Node installation.", icon="⚠")
         sys.exit(1)
 
-def install_tailwind_local():
-    print_status("Installing local TailwindCSS...", icon="⚡")
-    run_cmd("npm install --save-dev tailwindcss @tailwindcss/postcss")
-    # verify
-    result = subprocess.run("npx tailwindcss --version", shell=True, capture_output=True, text=True)
-    if result.returncode != 0:
-        print_status("TailwindCSS not found after local install.", icon="⚠")
+def install_node(os_type):
+    try:
+        if os_type in ["Ubuntu", "Debian"]:
+            run_cmd("sudo apt remove -y nodejs npm")
+            run_cmd("curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -")
+            run_cmd("sudo apt install -y nodejs")
+        elif os_type == "Arch":
+            run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "nodejs", "npm"])
+        elif os_type == "Windows":
+            print_status("Please install Node.js >=20 manually from https://nodejs.org/", icon="⚠")
+            sys.exit(1)
+        else:
+            print_status(f"No automatic Node.js install for {os_type}. Install >=20 manually.", icon="⚠")
+            sys.exit(1)
+    except subprocess.CalledProcessError:
+        print_status("Node.js installation failed. Install manually.", icon="⚠")
         sys.exit(1)
 
 def install_npm_deps():
     ensure_node()
+    print_status("Installing local npm dependencies including TailwindCSS...", icon="⚡")
+
+    # Install Tailwind locally with PostCSS plugin
+    tailwind_pkg = ["tailwindcss", "@tailwindcss/postcss"]
     if os.path.exists("package.json"):
-        print_status("Installing npm dependencies...", icon="⚡")
-        run_cmd("npm install --include=dev")
-    install_tailwind_local()
+        # Use devDependencies
+        run_cmd(["npm", "install", "--save-dev"] + tailwind_pkg)
+    else:
+        # Create a minimal package.json if missing
+        run_cmd(["npm", "init", "-y"])
+        run_cmd(["npm", "install", "--save-dev"] + tailwind_pkg)
+
+    # Check tailwind binary
+    tailwind_bin = os.path.join("node_modules", ".bin", "tailwindcss")
+    if not os.path.exists(tailwind_bin):
+        print_status("TailwindCSS binary still not found after npm install.", icon="⚠")
+        sys.exit(1)
+    print_status("TailwindCSS installed locally and ready.", icon="✅")
 
 # -------------------- SERVERS --------------------
 def find_free_port(start_port):
