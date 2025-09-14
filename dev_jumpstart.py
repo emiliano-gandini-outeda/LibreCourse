@@ -61,10 +61,33 @@ def print_status(msg, icon=""):
     print(f"[{icon}] {msg}" if icon else msg)
 
 # -------------------- VENV / PYTHON --------------------
+def install_venv_package(os_type):
+    print_status("Virtualenv module not found. Attempting to install system package...", icon="⚡")
+    try:
+        if os_type in ["Ubuntu", "Debian"]:
+            run_cmd(["sudo", "apt", "update"])
+            run_cmd(["sudo", "apt", "install", "-y", "python3.12-venv"])
+        elif os_type == "Arch":
+            run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "python-virtualenv"])
+        elif os_type == "Windows":
+            print_status("venv should already be included with Python on Windows. Please ensure Python is installed correctly.", icon="⚠")
+        else:
+            print_status(f"No automatic installation method for {os_type}. Install venv manually.", icon="⚠")
+    except subprocess.CalledProcessError:
+        print_status("Failed to install venv package. Install manually.", icon="⚠")
+        sys.exit(1)
+
 def ensure_venv():
+    try:
+        import venv
+    except ImportError:
+        os_type = detect_os()
+        install_venv_package(os_type)
+
     if not os.path.exists(VENV_PATH):
         print_status("Creating virtual environment...", icon="⚡")
         subprocess.run([sys.executable, "-m", "venv", VENV_PATH], check=True)
+
 
 def get_python_bin():
     return os.path.join(VENV_PATH, "Scripts" if platform.system() == "Windows" else "bin", "python")
@@ -132,7 +155,6 @@ def run_migrations():
 
 # -------------------- MAIN --------------------
 def main():
-    import shutil
     os_type = detect_os()
     print_status(f"Detected OS: {os_type}", icon=ICONS.get(os_type, ""))
     ensure_venv()
