@@ -124,13 +124,13 @@ def install_npm(os_type):
         print_status("Failed to install npm. Install manually.", icon="⚠")
         sys.exit(1)
 
-def ensure_npm_tailwind():
+def install_npm_deps():
     if not shutil.which("npm") or not shutil.which("npx"):
         os_type = detect_os()
         install_npm(os_type)
 
     # Install all dependencies including devDependencies
-    print_status("Installing npm dependencies including TailwindCSS...", icon="⚡")
+    print_status("Installing npm dependencies...", icon="⚡")
     run_cmd("npm install --include=dev")
 
     # Verify tailwind via npx
@@ -142,11 +142,6 @@ def ensure_npm_tailwind():
             icon="⚠"
         )
         sys.exit(1)
-
-def install_npm_deps():
-    if os.path.exists("package.json"):
-        print_status("Installing npm dependencies...", icon="📦")
-        run_cmd("npm install")
 
 # -------------------- SERVERS --------------------
 def find_free_port(start_port):
@@ -165,7 +160,7 @@ def run_servers():
     django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", str(port)])
 
     # Run Tailwind via npx
-    tailwind_cmd = "npx tailwindcss -i static/css/input.css -o static/css/output.css --watch"
+    tailwind_cmd = "tailwindcss -i static/css/input.css -o static/css/output.css --watch"
     tailwind_proc = subprocess.Popen(tailwind_cmd, shell=True)
 
     try:
@@ -199,7 +194,6 @@ def main():
     print_status(f"Detected OS: {os_type}", icon=ICONS.get(os_type, ""))
     ensure_venv()
     install_python_deps()
-    ensure_npm_tailwind()
     install_npm_deps()
     run_migrations()
     run_servers()
