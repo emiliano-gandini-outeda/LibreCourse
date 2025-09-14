@@ -105,6 +105,29 @@ def install_python_deps():
     else:
         run_cmd([python_bin, "-m", "pip", "install"] + PY_DEPS)
 
+# -------------------- CURL --------------------
+
+def ensure_curl(os_type):
+    if shutil.which("curl"):
+        return
+    print_status("curl not found. Installing...", icon="⚡")
+    try:
+        if os_type in ["Ubuntu", "Debian"]:
+            run_cmd(["sudo", "apt", "update"])
+            run_cmd(["sudo", "apt", "install", "-y", "curl"])
+        elif os_type == "Arch":
+            run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "curl"])
+        elif os_type == "Windows":
+            print_status("Please install curl manually from https://curl.se/windows/", icon="⚠")
+            sys.exit(1)
+        else:
+            print_status(f"No automatic curl installation for {os_type}. Install manually.", icon="⚠")
+            sys.exit(1)
+    except subprocess.CalledProcessError:
+        print_status("Failed to install curl. Install manually.", icon="⚠")
+        sys.exit(1)
+
+
 # -------------------- NPM / NODE / TAILWIND --------------------
 NODE_MIN_VERSION = (20, 17, 0)  # Minimum Node version for Tailwind 4
 
@@ -231,6 +254,8 @@ def run_migrations():
 def main():
     os_type = detect_os()
     print_status(f"Detected OS: {os_type}", icon=ICONS.get(os_type, ""))
+    ensure_curl(os_type)
+    check_node_version()
     ensure_venv()
     install_python_deps()
     install_npm_deps()
