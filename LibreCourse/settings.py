@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 from urllib.parse import urlparse
 from django.urls import reverse_lazy
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,6 +17,10 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+
+# Load env variables
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -140,7 +145,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'OPTIONS': {
             'min_length': 8,
         }
-    },
+    },# Database Credentials
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },

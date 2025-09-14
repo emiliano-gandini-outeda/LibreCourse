@@ -1,15 +1,6 @@
-# Core
-Django>=5.0,<6.0
-
-# Tailwind integration helpers
-django-browser-reload>=1.8.0
-django-widget-tweaks
-
-# Database (Railway usually defaults to Postgres)
+django>=4.2,<5.0
+django-browser-reload>=0.2
+django-widget-tweaks>=1.5
 psycopg2-binary>=2.9
-
-# Static files handling
-whitenoise>=6.5
-
-# Env vars loader
-python-dotenv>=1.0.1
+whitenoise>=6.4
+python-dotenv
