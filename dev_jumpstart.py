@@ -127,29 +127,23 @@ def ensure_curl(os_type):
         print_status("Failed to install curl. Install manually.", icon="⚠")
         sys.exit(1)
 
-
-# -------------------- NPM / NODE / TAILWIND --------------------
-NODE_MIN_VERSION = (20, 17, 0)  # Minimum Node version for Tailwind 4
+# -------------------- NODE / NPM / TAILWIND --------------------
+NODE_MIN_VERSION = (20, 17, 0)  # Tailwind requires >=20.17.0
 
 def get_node_version():
     try:
         result = subprocess.run(["node", "-v"], capture_output=True, text=True)
         if result.returncode != 0:
             return None
-        version_str = result.stdout.strip().lstrip("v")
-        version_tuple = tuple(int(x) for x in version_str.split("."))
+        version_tuple = tuple(int(x) for x in result.stdout.strip().lstrip("v").split("."))
         return version_tuple
     except FileNotFoundError:
         return None
 
-def ensure_node():
-    os_type = detect_os()
+def ensure_node(os_type):
     node_version = get_node_version()
-    if node_version is None:
-        print_status("Node.js not found. Installing...", icon="⚡")
-        install_node(os_type)
-    elif node_version < NODE_MIN_VERSION:
-        print_status(f"Node.js version too old ({'.'.join(map(str,node_version))}). Updating...", icon="⚡")
+    if node_version is None or node_version < NODE_MIN_VERSION:
+        print_status(f"Node.js missing or outdated ({node_version}). Installing latest...", icon="⚡")
         install_node(os_type)
     else:
         print_status(f"Node.js version OK ({'.'.join(map(str,node_version))})", icon="✅")
@@ -162,8 +156,7 @@ def ensure_node():
 def install_node(os_type):
     try:
         if os_type in ["Ubuntu", "Debian"]:
-            print_status("Removing old nodejs/npm...", icon="⚡")
-            run_cmd("sudo apt remove -y nodejs npm")
+            ensure_curl(os_type)
             print_status("Installing Node.js >=20 via NodeSource...", icon="⚡")
             run_cmd("curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -")
             run_cmd("sudo apt install -y nodejs")
@@ -179,32 +172,23 @@ def install_node(os_type):
         print_status("Node.js installation failed. Install manually.", icon="⚠")
         sys.exit(1)
 
-def check_node_version():
-    result = subprocess.run("node -v", shell=True, capture_output=True, text=True)
-    if result.returncode != 0 or not result.stdout.strip().startswith("v2"):
-        print_status("Node version too old or missing. Installing...", icon="⚡")
-        install_node(detect_os())
-
 def install_npm_deps():
-    ensure_node()
+    os_type = detect_os()
+    ensure_node(os_type)
     print_status("Installing local npm dependencies including TailwindCSS...", icon="⚡")
 
-    # Install Tailwind locally with PostCSS plugin
-    tailwind_pkg = ["tailwindcss", "@tailwindcss/postcss"]
-    if os.path.exists("package.json"):
-        # Use devDependencies
-        run_cmd(["npm", "install", "--save-dev"] + tailwind_pkg)
-    else:
-        # Create a minimal package.json if missing
+    tailwind_pkgs = ["tailwindcss", "postcss", "autoprefixer"]
+    if not os.path.exists("package.json"):
         run_cmd(["npm", "init", "-y"])
-        run_cmd(["npm", "install", "--save-dev"] + tailwind_pkg)
 
-    # Check tailwind binary
+    run_cmd(["npm", "install", "--save-dev"] + tailwind_pkgs)
+
     tailwind_bin = os.path.join("node_modules", ".bin", "tailwindcss")
     if not os.path.exists(tailwind_bin):
-        print_status("TailwindCSS binary still not found after npm install.", icon="⚠")
+        print_status("TailwindCSS binary not found after npm install.", icon="⚠")
         sys.exit(1)
-    print_status("TailwindCSS installed locally and ready.", icon="✅")
+    print_status(f"TailwindCSS installed locally at {tailwind_bin}", icon="✅")
+    return tailwind_bin
 
 # -------------------- SERVERS --------------------
 def find_free_port(start_port):
@@ -222,8 +206,9 @@ def run_servers():
 
     django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", str(port)])
 
-    tailwind_cmd = "npx tailwindcss -i static/css/input.css -o static/css/output.css --watch"
-    tailwind_proc = subprocess.Popen(tailwind_cmd, shell=True)
+    tailwind_bin = os.path.join("node_modules", ".bin", "tailwindcss")
+    tailwind_cmd = [tailwind_bin, "-i", "static/css/input.css", "-o", "static/css/output.css", "--watch"]
+    tailwind_proc = subprocess.Popen(tailwind_cmd)
 
     try:
         django_proc.wait()
@@ -232,6 +217,7 @@ def run_servers():
         print_status("Stopping servers...", icon="🛑")
         django_proc.terminate()
         tailwind_proc.terminate()
+
 
 # -------------------- MIGRATIONS --------------------
 def run_migrations():
@@ -254,13 +240,26 @@ def run_migrations():
 def main():
     os_type = detect_os()
     print_status(f"Detected OS: {os_type}", icon=ICONS.get(os_type, ""))
+
+    # Ensure curl is installed (needed for NodeSource on Ubuntu/Debian)
     ensure_curl(os_type)
-    check_node_version()
+
+    # Ensure Node.js >=20 and npm/npx
+    ensure_node(os_type)
+
+    # Ensure virtual environment & Python deps
     ensure_venv()
     install_python_deps()
-    install_npm_deps()
+
+    # Install npm dependencies (Tailwind locally)
+    tailwind_bin = install_npm_deps()  # <-- capture local binary path
+
+    # Apply Django migrations
     run_migrations()
-    run_servers()
+
+    # Start servers, passing the local Tailwind binary
+    run_servers(tailwind_bin)
+
 
 if __name__ == "__main__":
     main()
