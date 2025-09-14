@@ -62,7 +62,7 @@ def print_status(msg, icon=""):
 
 # -------------------- VENV / PYTHON --------------------
 def install_venv_package(os_type):
-    print_status("Virtualenv module not found. Attempting to install system package...", icon="⚡")
+    print_status("Virtualenv module not found or venv unusable. Installing system package...", icon="⚡")
     try:
         if os_type in ["Ubuntu", "Debian"]:
             run_cmd(["sudo", "apt", "update"])
@@ -78,23 +78,29 @@ def install_venv_package(os_type):
         sys.exit(1)
 
 def ensure_venv():
+    os_type = detect_os()
+
+    # Verifica si el paquete venv funciona
     try:
         import venv
-    except ImportError:
-        os_type = detect_os()
+        test_path = ".venv_test"
+        subprocess.run([sys.executable, "-m", "venv", test_path], check=True)
+        shutil.rmtree(test_path)
+    except (ImportError, subprocess.CalledProcessError):
         install_venv_package(os_type)
 
     if not os.path.exists(VENV_PATH):
         print_status("Creating virtual environment...", icon="⚡")
         subprocess.run([sys.executable, "-m", "venv", VENV_PATH], check=True)
 
-    # Asegurarse de que pip esté disponible en el venv
+    # Asegurar pip
     python_bin = get_python_bin()
     try:
         run_cmd([python_bin, "-m", "pip", "--version"])
     except subprocess.CalledProcessError:
         print_status("pip not found in venv. Installing pip...", icon="⚡")
         run_cmd([python_bin, "-m", "ensurepip", "--upgrade"])
+
 
 
 
