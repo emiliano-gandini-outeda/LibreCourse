@@ -17,6 +17,7 @@ PY_DEPS = [
 
 VENV_PATH = ".venv"
 DJANGO_PORT = 8000
+NODE_MIN_VERSION = (20, 17, 0)
 
 ICONS = {
     "Arch": "",
@@ -24,11 +25,50 @@ ICONS = {
     "Ubuntu": "",
     "Windows": "",
     "Linux": "",
+    "Python": "🐍",
+    "Node": "🟢",
+    "Tailwind": "🎨",
+    "Server": "🚀",
+    "Warning": "⚠",
+    "Success": "✅",
+    "Action": "⚡",
+    "DB": "🗄️",
+    "Stop": "🛑",
+    "Info": "💡"
 }
 
 # -------------------- UTILS --------------------
-def run_cmd(cmd, check=True, env=None):
-    print(f"> {' '.join(cmd) if isinstance(cmd, list) else cmd}")
+RESET = "\033[0m"
+COLORS = {
+    "cyan": "\033[96m",
+    "green": "\033[92m",
+    "yellow": "\033[93m",
+    "magenta": "\033[95m",
+    "blue": "\033[94m",
+    "red": "\033[91m",
+    "white": "\033[97m",
+    "grey": "\033[90m"
+}
+
+def print_header(msg):
+    print(f"\n{COLORS['blue']}==================== {msg} ===================={RESET}")
+
+def print_status(msg, icon="", color="white", indent=0):
+    indent_str = "  " * indent
+    c = COLORS.get(color, COLORS["white"])
+    print(f"{c}{indent_str}[{icon}] {msg}{RESET}")
+
+def run_cmd(cmd, check=True, env=None, hide_warnings=False):
+    if hide_warnings and isinstance(cmd, list) and cmd[0] == "npm":
+        # Redirect stderr to null
+        if platform.system().lower() != "windows":
+            cmd_str = " ".join(cmd) + " 2>/dev/null"
+            subprocess.run(cmd_str, check=check, shell=True)
+            return
+        else:
+            # On Windows, npm quiet mode
+            cmd.append("--quiet")
+    print_status(f"> {' '.join(cmd) if isinstance(cmd, list) else cmd}", icon=ICONS["Info"], indent=1)
     subprocess.run(cmd, check=check, env=env, shell=isinstance(cmd, str))
 
 def detect_os():
@@ -49,55 +89,49 @@ def detect_os():
                 return "Linux"
         except FileNotFoundError:
             return "Linux"
-    else:
-        return sys_platform
+    return sys_platform
 
-def print_status(msg, icon=""):
-    print(f"[{icon}] {msg}" if icon else msg)
-
-# -------------------- VENV / PYTHON --------------------
-def install_venv_package(os_type):
-    print_status("venv module not found or unusable. Installing system package...", icon="⚡")
-    try:
-        if os_type in ["Ubuntu", "Debian"]:
-            run_cmd(["sudo", "apt", "update"])
-            run_cmd(["sudo", "apt", "install", "-y", "python3.12-venv"])
-        elif os_type == "Arch":
-            run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "python-virtualenv"])
-        elif os_type == "Windows":
-            print_status("venv should already be included with Python on Windows. Please ensure Python is installed correctly.", icon="⚠")
-        else:
-            print_status(f"No automatic installation method for {os_type}. Install venv manually.", icon="⚠")
-    except subprocess.CalledProcessError:
-        print_status("Failed to install venv package. Install manually.", icon="⚠")
-        sys.exit(1)
-
+# -------------------- VENV --------------------
 def ensure_venv():
-    os_type = detect_os()
+    print_header("Python Virtual Environment")
     try:
         import venv
         test_path = ".venv_test"
         subprocess.run([sys.executable, "-m", "venv", test_path], check=True)
         shutil.rmtree(test_path)
     except (ImportError, subprocess.CalledProcessError):
-        install_venv_package(os_type)
+        install_venv_package(detect_os())
 
     if not os.path.exists(VENV_PATH):
-        print_status("Creating virtual environment...", icon="⚡")
+        print_status("Creating virtual environment...", ICONS["Action"], color="cyan")
         subprocess.run([sys.executable, "-m", "venv", VENV_PATH], check=True)
 
     python_bin = get_python_bin()
     try:
         run_cmd([python_bin, "-m", "pip", "--version"])
     except subprocess.CalledProcessError:
-        print_status("pip not found in venv. Installing pip...", icon="⚡")
+        print_status("pip not found in venv. Installing pip...", ICONS["Action"], color="cyan")
         run_cmd([python_bin, "-m", "ensurepip", "--upgrade"])
+
+def install_venv_package(os_type):
+    print_status("venv module not found. Installing system package...", ICONS["Action"], color="cyan")
+    try:
+        if os_type in ["Ubuntu", "Debian"]:
+            run_cmd(["sudo", "apt", "update"])
+            run_cmd(["sudo", "apt", "install", "-y", "python3-venv"])
+        elif os_type == "Arch":
+            run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "python-virtualenv"])
+        elif os_type == "Windows":
+            print_status("Please ensure Python includes venv module.", ICONS["Warning"], color="yellow")
+    except subprocess.CalledProcessError:
+        print_status("Failed to install venv package. Install manually.", ICONS["Warning"], color="yellow")
+        sys.exit(1)
 
 def get_python_bin():
     return os.path.join(VENV_PATH, "Scripts" if platform.system() == "Windows" else "bin", "python")
 
 def install_python_deps():
-    print_status("Installing Python dependencies...", icon="🐍")
+    print_header("Python Dependencies")
     python_bin = get_python_bin()
     run_cmd([python_bin, "-m", "pip", "install", "--upgrade", "pip"])
     if os.path.exists("requirements.txt"):
@@ -106,11 +140,12 @@ def install_python_deps():
         run_cmd([python_bin, "-m", "pip", "install"] + PY_DEPS)
 
 # -------------------- CURL --------------------
-
 def ensure_curl(os_type):
+    print_header("Checking curl")
     if shutil.which("curl"):
+        print_status("curl is already installed.", ICONS["Success"], color="green")
         return
-    print_status("curl not found. Installing...", icon="⚡")
+    print_status("curl not found. Installing...", ICONS["Action"], color="cyan")
     try:
         if os_type in ["Ubuntu", "Debian"]:
             run_cmd(["sudo", "apt", "update"])
@@ -118,18 +153,14 @@ def ensure_curl(os_type):
         elif os_type == "Arch":
             run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "curl"])
         elif os_type == "Windows":
-            print_status("Please install curl manually from https://curl.se/windows/", icon="⚠")
-            sys.exit(1)
-        else:
-            print_status(f"No automatic curl installation for {os_type}. Install manually.", icon="⚠")
+            print_status("Install curl manually from https://curl.se/windows/", ICONS["Warning"], color="yellow")
             sys.exit(1)
     except subprocess.CalledProcessError:
-        print_status("Failed to install curl. Install manually.", icon="⚠")
+        print_status("Failed to install curl. Install manually.", ICONS["Warning"], color="yellow")
         sys.exit(1)
+    print_status("curl is ready.", ICONS["Success"], color="green")
 
 # -------------------- NODE / NPM / TAILWIND --------------------
-NODE_MIN_VERSION = (20, 17, 0)  # Tailwind requires >=20.17.0
-
 def get_node_version():
     try:
         result = subprocess.run(["node", "-v"], capture_output=True, text=True)
@@ -140,57 +171,51 @@ def get_node_version():
     except FileNotFoundError:
         return None
 
-def ensure_node(os_type):
+def ensure_node():
+    print_header("Node.js & NPM")
+    os_type = detect_os()
     node_version = get_node_version()
     if node_version is None or node_version < NODE_MIN_VERSION:
-        print_status(f"Node.js missing or outdated ({node_version}). Installing latest...", icon="⚡")
+        print_status("Installing or updating Node.js...", ICONS["Action"], color="cyan")
         install_node(os_type)
     else:
-        print_status(f"Node.js version OK ({'.'.join(map(str,node_version))})", icon="✅")
+        print_status(f"Node.js version OK ({'.'.join(map(str,node_version))})", ICONS["Success"], color="green")
 
-    # Ensure npm exists
     if not shutil.which("npm") or not shutil.which("npx"):
-        print_status("npm/npx not found. Something went wrong with Node installation.", icon="⚠")
+        print_status("npm/npx missing. Node.js installation failed.", ICONS["Warning"], color="yellow")
         sys.exit(1)
 
 def install_node(os_type):
     try:
         if os_type in ["Ubuntu", "Debian"]:
-            ensure_curl(os_type)
-            print_status("Installing Node.js >=20 via NodeSource...", icon="⚡")
-            run_cmd("curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -")
-            run_cmd("sudo apt install -y nodejs")
+            run_cmd("curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -", hide_warnings=True)
+            run_cmd(["sudo", "apt", "install", "-y", "nodejs"], hide_warnings=True)
         elif os_type == "Arch":
-            run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "nodejs", "npm"])
+            run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "nodejs", "npm"], hide_warnings=True)
         elif os_type == "Windows":
-            print_status("Please install Node.js >=20 manually from https://nodejs.org/", icon="⚠")
-            sys.exit(1)
-        else:
-            print_status(f"No automatic Node.js install for {os_type}. Install >=20 manually.", icon="⚠")
+            print_status("Install Node.js >=20 manually from https://nodejs.org/", ICONS["Warning"], color="yellow")
             sys.exit(1)
     except subprocess.CalledProcessError:
-        print_status("Node.js installation failed. Install manually.", icon="⚠")
+        print_status("Node.js installation failed. Install manually.", ICONS["Warning"], color="yellow")
         sys.exit(1)
 
 def install_npm_deps():
-    os_type = detect_os()
-    ensure_node(os_type)
-    print_status("Installing local npm dependencies including TailwindCSS...", icon="⚡")
+    print_header("TailwindCSS Setup")
+    ensure_node()
 
-    tailwind_pkgs = ["tailwindcss", "postcss", "autoprefixer"]
+    packages = ["tailwindcss", "@tailwindcss/cli", "postcss", "autoprefixer"]
     if not os.path.exists("package.json"):
-        run_cmd(["npm", "init", "-y"])
+        run_cmd(["npm", "init", "-y"], hide_warnings=True)
 
-    run_cmd(["npm", "install", "--save-dev"] + tailwind_pkgs)
+    run_cmd(["npm", "install", "--save-dev"] + packages, hide_warnings=True)
 
     tailwind_bin = os.path.join("node_modules", ".bin", "tailwindcss")
     if not os.path.exists(tailwind_bin):
-        print_status("TailwindCSS binary not found after npm install.", icon="⚠")
+        print_status("TailwindCSS binary not found!", ICONS["Warning"], color="yellow")
         sys.exit(1)
-    print_status(f"TailwindCSS installed locally at {tailwind_bin}", icon="✅")
-    return tailwind_bin
+    print_status("TailwindCSS is installed and ready.", ICONS["Success"], color="green")
 
-# -------------------- SERVERS --------------------
+# -------------------- SERVER --------------------
 def find_free_port(start_port):
     port = start_port
     while True:
@@ -200,66 +225,43 @@ def find_free_port(start_port):
         port += 1
 
 def run_servers():
-    print_status("Starting Django and Tailwind servers...", icon="🚀")
+    print_header("Starting Servers")
     python_bin = get_python_bin()
     port = find_free_port(DJANGO_PORT)
-
     django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", str(port)])
-
-    tailwind_bin = os.path.join("node_modules", ".bin", "tailwindcss")
-    tailwind_cmd = [tailwind_bin, "-i", "static/css/input.css", "-o", "static/css/output.css", "--watch"]
-    tailwind_proc = subprocess.Popen(tailwind_cmd)
+    tailwind_proc = subprocess.Popen("npx tailwindcss -i static/css/input.css -o static/css/output.css --watch", shell=True)
 
     try:
         django_proc.wait()
         tailwind_proc.wait()
     except KeyboardInterrupt:
-        print_status("Stopping servers...", icon="🛑")
+        print_status("Stopping servers...", ICONS["Stop"], color="yellow")
         django_proc.terminate()
         tailwind_proc.terminate()
 
-
 # -------------------- MIGRATIONS --------------------
 def run_migrations():
-    print_status("Checking for pending migrations...", icon="🗄️")
+    print_header("Django Migrations")
     python_bin = get_python_bin()
-    result = subprocess.run(
-        [python_bin, "manage.py", "showmigrations", "--plan"],
-        capture_output=True,
-        text=True,
-    )
+    result = subprocess.run([python_bin, "manage.py", "showmigrations", "--plan"], capture_output=True, text=True)
     pending = any(line.strip().startswith("[ ]") for line in result.stdout.splitlines())
     if pending:
-        print_status("Applying Django migrations...", icon="🗄️")
+        print_status("Applying migrations...", ICONS["DB"], color="cyan")
         run_cmd([python_bin, "manage.py", "makemigrations"])
         run_cmd([python_bin, "manage.py", "migrate"])
     else:
-        print_status("No migrations to apply.", icon="✅")
+        print_status("No migrations to apply.", ICONS["Success"], color="green")
 
 # -------------------- MAIN --------------------
 def main():
     os_type = detect_os()
-    print_status(f"Detected OS: {os_type}", icon=ICONS.get(os_type, ""))
-
-    # Ensure curl is installed (needed for NodeSource on Ubuntu/Debian)
+    print_header(f"Detected OS: {os_type} {ICONS.get(os_type,'')}")
     ensure_curl(os_type)
-
-    # Ensure Node.js >=20 and npm/npx
-    ensure_node(os_type)
-
-    # Ensure virtual environment & Python deps
     ensure_venv()
     install_python_deps()
-
-    # Install npm dependencies (Tailwind locally)
-    tailwind_bin = install_npm_deps()  # <-- capture local binary path
-
-    # Apply Django migrations
+    install_npm_deps()
     run_migrations()
-
-    # Start servers, passing the local Tailwind binary
-    run_servers(tailwind_bin)
-
+    run_servers()
 
 if __name__ == "__main__":
     main()
