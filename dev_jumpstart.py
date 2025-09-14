@@ -118,11 +118,28 @@ def install_python_deps():
 
 
 # -------------------- NPM / TAILWIND --------------------
+def install_npm(os_type):
+    print_status("npm/npx not found. Attempting to install...", icon="⚡")
+    try:
+        if os_type in ["Ubuntu", "Debian"]:
+            run_cmd(["sudo", "apt", "update"])
+            run_cmd(["sudo", "apt", "install", "-y", "npm"])
+        elif os_type == "Arch":
+            run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "npm"])
+        elif os_type == "Windows":
+            print_status("Please install Node.js from https://nodejs.org/ to get npm/npx", icon="⚠")
+            sys.exit(1)
+        else:
+            print_status(f"No automatic npm installation method for {os_type}. Install manually.", icon="⚠")
+            sys.exit(1)
+    except subprocess.CalledProcessError:
+        print_status("Failed to install npm. Install manually.", icon="⚠")
+        sys.exit(1)
+
 def ensure_npm_tailwind():
     if not shutil.which("npm") or not shutil.which("npx"):
-        print_status("npm or npx not found. Install manually.", icon="⚠")
-        sys.exit(1)
-    # Tailwind is installed via npx so no global install needed
+        os_type = detect_os()
+        install_npm(os_type)
 
 def install_npm_deps():
     if os.path.exists("package.json"):
