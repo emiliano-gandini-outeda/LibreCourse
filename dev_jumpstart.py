@@ -124,24 +124,24 @@ def install_npm(os_type):
         print_status("Failed to install npm. Install manually.", icon="⚠")
         sys.exit(1)
 
+def install_tailwind_global():
+    # Check if tailwindcss is globally installed
+    if not shutil.which("tailwindcss"):
+        print_status("TailwindCSS not found globally. Installing globally...", icon="⚡")
+        run_cmd("npm install -g tailwindcss")
+
 def install_npm_deps():
+    os_type = detect_os()
     if not shutil.which("npm") or not shutil.which("npx"):
-        os_type = detect_os()
         install_npm(os_type)
 
-    # Install all dependencies including devDependencies
-    print_status("Installing npm dependencies...", icon="⚡")
+    # Install local dependencies (optional, devDependencies)
+    print_status("Installing local npm dependencies...", icon="⚡")
     run_cmd("npm install --include=dev")
 
-    # Verify tailwind via npx
-    result = subprocess.run("npx tailwindcss --version", shell=True, capture_output=True, text=True)
-    if result.returncode != 0:
-        print_status(
-            "TailwindCSS still not found via npx! You may need to install it globally with:\n"
-            "  npm install -g tailwindcss",
-            icon="⚠"
-        )
-        sys.exit(1)
+    # Ensure Tailwind is globally available
+    install_tailwind_global()
+
 
 # -------------------- SERVERS --------------------
 def find_free_port(start_port):
@@ -159,7 +159,7 @@ def run_servers():
 
     django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", str(port)])
 
-    # Run Tailwind via npx
+    # Tailwind now runs globally
     tailwind_cmd = "tailwindcss -i static/css/input.css -o static/css/output.css --watch"
     tailwind_proc = subprocess.Popen(tailwind_cmd, shell=True)
 
