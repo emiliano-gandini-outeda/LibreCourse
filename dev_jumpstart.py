@@ -125,10 +125,15 @@ def install_npm(os_type):
         sys.exit(1)
 
 def install_tailwind_global():
-    # Check if tailwindcss is globally installed
     if not shutil.which("tailwindcss"):
         print_status("TailwindCSS not found globally. Installing globally...", icon="⚡")
-        run_cmd("npm install -g tailwindcss")
+        os_type = detect_os()
+        if os_type in ["Ubuntu", "Debian", "Arch", "Linux"]:
+            cmd = "sudo npm install -g tailwindcss"
+        else:
+            cmd = "npm install -g tailwindcss"
+        run_cmd(cmd)
+
 
 def install_npm_deps():
     os_type = detect_os()
