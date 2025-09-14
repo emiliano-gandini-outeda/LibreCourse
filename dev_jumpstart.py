@@ -139,7 +139,9 @@ def ensure_node():
 def install_node(os_type):
     try:
         if os_type in ["Ubuntu", "Debian"]:
+            # Remove old node/npm
             run_cmd("sudo apt remove -y nodejs npm")
+            # Install Node 20 from NodeSource
             run_cmd("curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -")
             run_cmd("sudo apt install -y nodejs")
         elif os_type == "Arch":
@@ -153,6 +155,7 @@ def install_node(os_type):
     except subprocess.CalledProcessError:
         print_status("Node.js installation failed. Install manually.", icon="⚠")
         sys.exit(1)
+
 
 def install_npm_deps():
     ensure_node()
