@@ -139,9 +139,9 @@ def ensure_node():
 def install_node(os_type):
     try:
         if os_type in ["Ubuntu", "Debian"]:
-            # Remove old node/npm
+            print_status("Removing old nodejs/npm...", icon="⚡")
             run_cmd("sudo apt remove -y nodejs npm")
-            # Install Node 20 from NodeSource
+            print_status("Installing Node.js >=20 via NodeSource...", icon="⚡")
             run_cmd("curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -")
             run_cmd("sudo apt install -y nodejs")
         elif os_type == "Arch":
@@ -156,6 +156,11 @@ def install_node(os_type):
         print_status("Node.js installation failed. Install manually.", icon="⚠")
         sys.exit(1)
 
+def check_node_version():
+    result = subprocess.run("node -v", shell=True, capture_output=True, text=True)
+    if result.returncode != 0 or not result.stdout.strip().startswith("v2"):
+        print_status("Node version too old or missing. Installing...", icon="⚡")
+        install_node(detect_os())
 
 def install_npm_deps():
     ensure_node()
