@@ -106,47 +106,50 @@ def install_python_deps():
         run_cmd([python_bin, "-m", "pip", "install"] + PY_DEPS)
 
 # -------------------- NPM / TAILWIND --------------------
-def install_npm(os_type):
-    print_status("npm/npx not found. Installing...", icon="⚡")
-    try:
-        if os_type in ["Ubuntu", "Debian"]:
-            run_cmd(["sudo", "apt", "update"])
-            run_cmd(["sudo", "apt", "install", "-y", "npm"])
-        elif os_type == "Arch":
-            run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "npm"])
-        elif os_type == "Windows":
-            print_status("Please install Node.js from https://nodejs.org/ to get npm/npx", icon="⚠")
+def ensure_npm(os_type):
+    if not shutil.which("npm") or not shutil.which("npx"):
+        print_status("npm/npx not found. Installing...", icon="⚡")
+        try:
+            if os_type in ["Ubuntu", "Debian"]:
+                run_cmd(["sudo", "apt", "update"])
+                run_cmd(["sudo", "apt", "install", "-y", "npm"])
+            elif os_type == "Arch":
+                run_cmd(["sudo", "pacman", "-Syu", "--noconfirm", "npm"])
+            elif os_type == "Windows":
+                print_status("Please install Node.js from https://nodejs.org/ to get npm/npx", icon="⚠")
+                sys.exit(1)
+            else:
+                print_status(f"No automatic npm installation method for {os_type}. Install manually.", icon="⚠")
+                sys.exit(1)
+        except subprocess.CalledProcessError:
+            print_status("Failed to install npm. Install manually.", icon="⚠")
             sys.exit(1)
-        else:
-            print_status(f"No automatic npm installation method for {os_type}. Install manually.", icon="⚠")
-            sys.exit(1)
-    except subprocess.CalledProcessError:
-        print_status("Failed to install npm. Install manually.", icon="⚠")
-        sys.exit(1)
 
-def install_tailwind_global():
-    if not shutil.which("tailwindcss"):
-        print_status("TailwindCSS not found globally. Installing globally...", icon="⚡")
-        os_type = detect_os()
-        if os_type in ["Ubuntu", "Debian", "Arch", "Linux"]:
-            cmd = "sudo npm install -g tailwindcss"
-        else:
-            cmd = "npm install -g tailwindcss"
-        run_cmd(cmd)
-
+def install_tailwind_local():
+    tailwind_path = os.path.join("node_modules", ".bin", "tailwindcss")
+    if not os.path.exists(tailwind_path):
+        print_status("Installing TailwindCSS locally...", icon="⚡")
+        run_cmd("npm install --save-dev tailwindcss @tailwindcss/postcss")
 
 def install_npm_deps():
     os_type = detect_os()
-    if not shutil.which("npm") or not shutil.which("npx"):
-        install_npm(os_type)
+    ensure_npm(os_type)
 
-    # Install local dependencies (optional, devDependencies)
+    # Install project dependencies
     print_status("Installing local npm dependencies...", icon="⚡")
     run_cmd("npm install --include=dev")
 
-    # Ensure Tailwind is globally available
-    install_tailwind_global()
+    # Install Tailwind locally if missing
+    install_tailwind_local()
 
+    # Verify Tailwind via npx
+    result = subprocess.run("npx tailwindcss --version", shell=True, capture_output=True, text=True)
+    if result.returncode != 0:
+        print_status(
+            "TailwindCSS still not found! Check your npm installation.",
+            icon="⚠"
+        )
+        sys.exit(1)
 
 # -------------------- SERVERS --------------------
 def find_free_port(start_port):
@@ -164,8 +167,7 @@ def run_servers():
 
     django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", str(port)])
 
-    # Tailwind now runs globally
-    tailwind_cmd = "tailwindcss -i static/css/input.css -o static/css/output.css --watch"
+    tailwind_cmd = "npx tailwindcss -i static/css/input.css -o static/css/output.css --watch"
     tailwind_proc = subprocess.Popen(tailwind_cmd, shell=True)
 
     try:
