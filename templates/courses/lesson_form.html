@@ -1,0 +1,7 @@
+<h1>{% if lesson %}Edit Lesson{% else %}New Lesson{% endif %}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% if lesson %}Update{% else %}Create{% endif %}</button>
+</form>

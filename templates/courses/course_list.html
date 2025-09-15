@@ -1,0 +1,43 @@
+<h1>Courses</h1>
+
+<form method="get">
+    <input type="text" name="q" placeholder="Search by title, tag, or description..." value="{{ current_q }}">
+    <select name="tag">
+        <option value="">All tags</option>
+        {% for tag in all_tags %}
+            <option value="{{ tag.name }}" {% if current_tag == tag.name %}selected{% endif %}>{{ tag.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Search</button>
+</form>
+
+<ul>
+    {% for course in courses %}
+        <li>
+            <a href="{% url 'course-detail' course.pk %}">{{ course.title }}</a>
+            <br>Author: {{ course.creator.username }}
+            <br>Tags: 
+            {% for tag in course.tags.all %}
+                {{ tag.name }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                None
+            {% endfor %}
+        </li>
+    {% empty %}
+        <li>No courses found.</li>
+    {% endfor %}
+</ul>
+
+{% if is_paginated %}
+    <div>
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_tag %}&tag={{ current_tag }}{% endif %}">Previous</a>
+        {% endif %}
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_tag %}&tag={{ current_tag }}{% endif %}">Next</a>
+        {% endif %}
+    </div>
+{% endif %}
+
+<a href="{% url 'course-create' %}">Create New Course</a>

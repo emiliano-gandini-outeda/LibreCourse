@@ -1,0 +1,37 @@
+<h1>{{ course.title }}</h1>
+<p>{{ course.description }}</p>
+<p>Author: {{ course.creator.username }}</p>
+
+<h2>Lessons</h2>
+<ul>
+    {% for lesson in lessons %}
+        <li>
+            {{ lesson.position }}. <a href="#">{{ lesson.title }}</a>
+            {% if request.user == course.creator %}
+                | <a href="{% url 'lesson-update' course.pk lesson.pk %}">Edit</a>
+                | <a href="{% url 'lesson-delete' course.pk lesson.pk %}">Delete</a>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>No lessons yet.</li>
+    {% endfor %}
+</ul>
+
+{% if request.user == course.creator or request.user in course.collaborators.all %}
+    <a href="{% url 'lesson-create' course.pk %}">New Lesson</a>
+{% endif %}
+
+{% if request.user == course.creator %}
+    <a href="{% url 'course-update' course.pk %}">Edit Course</a>
+    <a href="{% url 'course-delete' course.pk %}">Delete Course</a>
+    <a href="{% url 'course-manage-collaborators' course.pk %}">Manage Collaborators</a>
+{% endif %}
+
+<h2>Related Courses</h2>
+<ul>
+    {% for related in related_courses %}
+        <li><a href="{% url 'course-detail' related.pk %}">{{ related.title }}</a></li>
+    {% empty %}
+        <li>No related courses.</li>
+    {% endfor %}
+</ul>

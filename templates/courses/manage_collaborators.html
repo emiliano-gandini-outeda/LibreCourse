@@ -1,0 +1,9 @@
+<h1>Manage Collaborators for "{{ object.title }}"</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+<a href="{% url 'course-detail' object.pk %}">Back to Course</a>
