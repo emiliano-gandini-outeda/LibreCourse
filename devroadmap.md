@@ -6,8 +6,6 @@ This roadmap is organized into phases, where each phase delivers a functional an
 
 ### **Phase 0: Foundation & Setup (Non-Negotiable Prerequisites)**
 
-This phase is about setting up the project for success, security, and maintainability before writing core application logic.
-
 * **0.1. Project Initialization & Config**
 
   * **Description:** Standard Django project setup with a modern, decoupled structure.
@@ -15,7 +13,6 @@ This phase is about setting up the project for success, security, and maintainab
 
     * Use `django-environ` to manage environment variables (SECRET\_KEY, DB URLs, API keys).
     * Structure the project with multiple apps (`users`, `courses`, `progress`, `forum`).
-    * Set up a custom `User` model (e.g., `accounts.User`) **immediately** to avoid painful migrations later.
     * Configure settings for multiple environments: `base.py`, `development.py`, `production.py`.
 
 * **0.2. Security Hardening (Initial Pass)**
@@ -76,6 +73,17 @@ This phase is about setting up the project for success, security, and maintainab
     * Build the `UserProgress` model with a `GenericForeignKey` to any content type.
     * Create a simple API endpoint (`POST /api/progress/<content_id>/`) to mark a lesson as complete.
     * Update the UI to show checkmarks or progress bars.
+
+* **1.4. Change History (Immutable)**
+
+  * **Implementation:**
+
+    * Build a `ChangeHistory` model to track all modifications to courses, modules, lessons, and content.
+
+      * Fields: `user`, `content_object` (GenericForeignKey), `action` (create, update, delete), `timestamp`, `details` (JSON/text).
+    * Ensure **entries cannot be deleted**, even by admins, to maintain audit integrity.
+    * Update all create/update/delete views to automatically log relevant changes to `ChangeHistory`.
+    * Create a simple read-only UI for course authors to view the history of their course content.
 
 ---
 
@@ -212,36 +220,41 @@ This phase is about setting up the project for success, security, and maintainab
 Templates Roadmap (Grouped by Function)
 
 Authentication & Onboarding:
-  - base.html                      # Base Django template to extend
-  - users/login.html               # User login form
-  - users/signup.html              # User registration form
-  - users/password_reset.html      # Password reset request
+  - base.html                          # Base Django template to extend
+  - users/login.html                   # User login form
+  - users/signup.html                  # User registration form
+  - users/password_reset.html          # Password reset request
   - users/password_reset_confirm.html  # Password reset confirmation
   - users/password_reset_done.html     # Password reset email sent
   - users/password_reset_complete.html # Password reset complete
 
 User Management:
-  - users/profile.html             # Logged-in user's profile (view/edit)
-  - users/update_profile.html      # Profile update form
-  - users/change_password.html     # Password change form
-  - users/users.html               # User list (admin view)
-  - users/user-details.html        # Other users' profile pages
-
-Course Content:
-  - main.html                      # Home page with featured courses, hero section
-  - courses.html                   # Course list with search/filter bar
-  - course.html                    # Individual course detail page
-
-Error Handling:
-  - 400.html                       # Bad Request
-  - 403.html                       # Permission Denied / Forbidden
-  - 404.html                       # Page Not Found
-  - 405.html                       # Method Not Allowed
-  - 500.html                       # Internal Server Error
-
-System & Maintenance:
-  - maintenance.html               # Planned downtime/maintenance mode
-  - no-access.html                 # Restricted content access message
-  - session-expired.html           # Session timeout handling
-  - 502.html                       # Bad Gateway (reverse proxy setups)
-  - 503.html                       # Service Unavailable (maintenance)
+  - users/profile.html                 # Logged-in user's profile (view/edit)
+  - users/update_profile.html          # Profile update form
+  - users/change_password.html         # Password change form
+  - users/users.html                   # User list
+  - users/user-details.html            # Other users' profile pages
+    
+Course Content:    
+  - main.html                          # Home page with featured courses, hero section
+  - courses/course_list.html           # Course list with search/filter bar
+  - courses/course_detail.html         # Individual course detail page
+  - courses/course_form.html           # Course creation/update form
+  - courses/manage_collaborators.html  # Creator-only page to manage collaborators
+  - courses/course_confirm_delete.html # Confirmation page for deleting a course
+  - courses/lesson_form.html           # Lesson creation/update form
+  - courses/lesson_confirm_delete.html # Confirmation page for deleting a lesson
+    
+Error Handling:    
+  - 400.html                           # Bad Request
+  - 403.html                           # Permission Denied / Forbidden
+  - 404.html                           # Page Not Found
+  - 405.html                           # Method Not Allowed
+  - 500.html                           # Internal Server Error
+    
+System & Maintenance:    
+  - maintenance.html                   # Planned downtime/maintenance mode
+  - no-access.html                     # Restricted content access message
+  - session-expired.html               # Session timeout handling
+  - 502.html                           # Bad Gateway (reverse proxy setups)
+  - 503.html                           # Service Unavailable (maintenance)
