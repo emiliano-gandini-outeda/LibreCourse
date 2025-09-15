@@ -1,9 +1,184 @@
 <h1>Manage Collaborators for "{{ object.title }}"</h1>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-</form>
+<!-- Current confirmed collaborators -->
+<h2>Current Collaborators</h2>
+<ul>
+    {% for user in object.collaborators.all %}
+        <li>
+            {{ user.display_name }}
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="remove_user_id" value="{{ user.pk }}">
+                <button type="submit">X</button>
+            </form>
+        </li>
+    {% empty %}
+        <li>No collaborators yet.</li>
+    {% endfor %}
+</ul>
+
+<!-- Pending collaborators -->
+<h2>Pending Collaborators</h2>
+<ul>
+    {% for p in pending_collaborators %}
+        <li>
+            {% if p.exists %}
+                <img src="{{ p.profile_picture }}" width="20" height="20">
+                {{ p.display_name }} (Pending)
+            {% else %}
+                <img src="/static/default_avatar.png" width="20" height="20">
+                {{ p.email }} (Pending)
+            {% endif %}
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="remove_pending_email" value="{{ p.email }}">
+                <button type="submit">X</button>
+            </form>
+        </li>
+    {% empty %}
+        <li>No pending collaborators.</li>
+    {% endfor %}
+</ul>
+
+<!-- Add existing users by username/ID -->
+<h2>Add Existing Users</h2>
+<input type="text" id="user_input" placeholder="Type username or ID" autocomplete="off">
+<div id="user_suggestions" style="border:1px solid #ccc; display:none;"></div>
+<ul id="staged_users"></ul>
+<button id="invite_users_btn">Invite Selected Users</button>
+
+<!-- Add new emails -->
+<h2>Invite by Email</h2>
+<input type="email" id="email_input" placeholder="Type email">
+<button id="add_email_btn">Stage Email</button>
+<ul id="staged_emails"></ul>
+<button id="invite_emails_btn">Invite Emails</button>
 
 <a href="{% url 'course-detail' object.pk %}">Back to Course</a>
+
+<script>
+const allUsers = [
+    {% for u in all_users %}
+        {id: "{{ u.id }}", username: "{{ u.username }}", display_name: "{{ u.display_name }}", profile_picture: "{{ u.profile_picture }}"},
+    {% endfor %}
+];
+
+let stagedUsers = [];
+let stagedEmails = [];
+
+// USER AUTOCOMPLETE & STAGING
+const userInput = document.getElementById('user_input');
+const userSuggestions = document.getElementById('user_suggestions');
+const stagedUsersList = document.getElementById('staged_users');
+
+userInput.addEventListener('input', function() {
+    const value = this.value.toLowerCase();
+    userSuggestions.innerHTML = '';
+    if (!value) { userSuggestions.style.display = 'none'; return; }
+
+    const matches = allUsers.filter(u =>
+        u.username.toLowerCase().includes(value) || u.id.toString() === value
+    );
+
+    matches.forEach(u => {
+        const div = document.createElement('div');
+        div.textContent = u.display_name + " (#" + u.id + ")";
+        div.style.cursor = 'pointer';
+        div.addEventListener('click', () => {
+            if (!stagedUsers.find(su => su.id === u.id)) {
+                stagedUsers.push(u);
+                updateStagedUsers();
+            }
+            userInput.value = '';
+            userSuggestions.style.display = 'none';
+        });
+        userSuggestions.appendChild(div);
+    });
+    userSuggestions.style.display = matches.length ? 'block' : 'none';
+});
+
+function updateStagedUsers() {
+    stagedUsersList.innerHTML = '';
+    stagedUsers.forEach(u => {
+        const li = document.createElement('li');
+        li.textContent = u.display_name + " (#" + u.id + ")";
+        li.style.cursor = 'pointer';
+        li.addEventListener('click', () => {
+            stagedUsers = stagedUsers.filter(su => su.id !== u.id);
+            updateStagedUsers();
+        });
+        stagedUsersList.appendChild(li);
+    });
+}
+
+// EMAIL STAGING
+const emailInput = document.getElementById('email_input');
+const stagedEmailsList = document.getElementById('staged_emails');
+document.getElementById('add_email_btn').addEventListener('click', () => {
+    const email = emailInput.value.trim();
+    if (email && !stagedEmails.includes(email)) {
+        stagedEmails.push(email);
+        updateStagedEmails();
+    }
+    emailInput.value = '';
+});
+
+function updateStagedEmails() {
+    stagedEmailsList.innerHTML = '';
+    stagedEmails.forEach(e => {
+        const li = document.createElement('li');
+        li.textContent = e;
+        li.style.cursor = 'pointer';
+        li.addEventListener('click', () => {
+            stagedEmails = stagedEmails.filter(se => se !== e);
+            updateStagedEmails();
+        });
+        stagedEmailsList.appendChild(li);
+    });
+}
+
+// POST INVITES
+document.getElementById('invite_users_btn').addEventListener('click', () => {
+    if (!stagedUsers.length) return;
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.style.display = 'none';
+    form.action = "{% url 'course-manage-collaborators' object.pk %}";
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrfmiddlewaretoken';
+    csrf.value = '{{ csrf_token }}';
+    form.appendChild(csrf);
+    stagedUsers.forEach(u => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'new_users[]';
+        input.value = u.username;
+        form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+});
+
+document.getElementById('invite_emails_btn').addEventListener('click', () => {
+    if (!stagedEmails.length) return;
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.style.display = 'none';
+    form.action = "{% url 'course-manage-collaborators' object.pk %}";
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrfmiddlewaretoken';
+    csrf.value = '{{ csrf_token }}';
+    form.appendChild(csrf);
+    stagedEmails.forEach(e => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'new_emails[]';
+        input.value = e;
+        form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+});
+</script>
