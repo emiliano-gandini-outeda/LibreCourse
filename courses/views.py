@@ -1,5 +1,9 @@
-from courses.models import Course, Lesson, Tag
-from users.models import User
+from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.mail import send_mail
+from django.db.models import Case, When, Value, IntegerField, Q
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from courses.forms import CourseForm, LessonForm, CollaboratorsForm
@@ -267,3 +271,25 @@ class ManageCollaboratorsView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
 
     def get_success_url(self):
         return reverse("course-manage-collaborators", kwargs={"pk": self.object.pk})
+
+# JSON endpoint for autocomplete
+
+@require_GET
+def user_autocomplete(request):
+    query = request.GET.get("q", "").strip()
+    results = []
+    if query:
+        qs = User.objects.filter(
+            Q(username__icontains=query) | Q(id__iexact=query)
+        ).exclude(pk=request.user.pk)[:10]
+
+        results = [
+            {
+                "id": u.id,
+                "display_name": u.display_name,
+                "username": u.username,
+                "profile_picture": u.profile_picture or "/static/default_avatar.png"
+            }
+            for u in qs
+        ]
+    return JsonResponse(results, safe=False)
