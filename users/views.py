@@ -22,10 +22,14 @@ def signup_view(request):
                 password=password
             )
             
-            login(request, user)
-            return redirect('home') 
-        
-        # If form is invalid, fall through to render form with errors
+            # Authenticate using custom backend
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                login(request, user)  # now works without ValueError
+                return redirect('home')
+            
+            # Fallback if authentication fails (should not happen)
+            form.add_error(None, "Unable to log in with the provided credentials.")
     
     else:  # GET request
         form = SignupForm()
