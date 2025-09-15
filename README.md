@@ -67,6 +67,11 @@ LibreCourse is continuously evolving. Upcoming features include:
 * ✅ **Offline mode** with automatic progress syncing.
 * ✅ **Multilingual support** for global communities.
 * ✅ **API integrations** with external tools.
+* ✅ **Discover & recommendations**
+
+  * Browse courses via a feed or personalized recommendations.
+
+
 
 ---
 
