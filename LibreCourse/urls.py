@@ -24,3 +24,5 @@ urlpatterns = [
     path("users/", include("users.urls")),
     path("", views.home_view, name = "home")
 ]
+
+handler403 = "LibreCourse.views.permission_denied_view"
