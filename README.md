@@ -71,7 +71,7 @@ LibreCourse is continuously evolving. Upcoming features include:
 
   * Browse courses via a feed or personalized recommendations.
 
-
+More details in [Dev Roadmap](devroadmap.md)
 
 ---
 
