@@ -243,14 +243,22 @@ def run_servers():
 def run_migrations():
     print_header("Django Migrations")
     python_bin = get_python_bin()
-    result = subprocess.run([python_bin, "manage.py", "showmigrations", "--plan"], capture_output=True, text=True)
+
+    # Step 1: Always run makemigrations first
+    print_status("Checking for model changes...", ICONS["DB"], color="cyan")
+    run_cmd([python_bin, "manage.py", "makemigrations"])
+
+    # Step 2: Check for unapplied migrations
+    result = subprocess.run([python_bin, "manage.py", "showmigrations", "--plan"],
+                            capture_output=True, text=True)
     pending = any(line.strip().startswith("[ ]") for line in result.stdout.splitlines())
+
     if pending:
         print_status("Applying migrations...", ICONS["DB"], color="cyan")
-        run_cmd([python_bin, "manage.py", "makemigrations"])
         run_cmd([python_bin, "manage.py", "migrate"])
     else:
         print_status("No migrations to apply.", ICONS["Success"], color="green")
+
 
 # -------------------- MAIN --------------------
 def main():
