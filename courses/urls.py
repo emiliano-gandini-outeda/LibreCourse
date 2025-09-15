@@ -11,4 +11,5 @@ urlpatterns = [
     path("<int:course_id>/lessons/<int:lesson_id>/update/", views.LessonUpdateView.as_view(), name="lesson-update"),
     path("<int:course_id>/lessons/<int:lesson_id>/delete/", views.LessonDeleteView.as_view(), name="lesson-delete"),
     path("<int:pk>/collaborators/manage/", views.ManageCollaboratorsView.as_view(), name="course-manage-collaborators"),
+    path("collaborators/autocomplete/", views.user_autocomplete, name="user-autocomplete")
 ]
