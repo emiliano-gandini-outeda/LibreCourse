@@ -2,12 +2,14 @@ from courses.models import Course, Lesson, Tag
 from users.models import User
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.db.models import Case, When, Value, IntegerField, Q
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from courses.forms import CourseForm, LessonForm, CollaboratorsForm
-from django.urls import reverse
-from django import forms
-from django.shortcuts import get_object_or_404
+from courses.models import Course, Lesson, Tag, PendingCollaborator
+from users.models import User
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.core.signing import Signer
+
+
 
 # Create your views here.
 class CourseListView(ListView):
@@ -146,9 +148,15 @@ class LessonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         lesson = self.get_object()
         course = lesson.course
         return self.request.user == course.creator or self.request.user in course.collaborators.all()
+    
+    def get_object(self, queryset=None):
+        lesson_id = self.kwargs.get("lesson_id")
+        return get_object_or_404(Lesson, id=lesson_id)
 
     def get_success_url(self):
         return reverse("course-detail", kwargs={"pk": self.object.course.pk})
+
+    
 
 class LessonDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Lesson
