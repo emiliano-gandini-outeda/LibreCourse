@@ -1,7 +1,102 @@
-<h1>{% if course %}Edit Course{% else %}Create Course{% endif %}</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if form.instance.pk %}Edit Course{% else %}Create Course{% endif %}</title>
+    <style>
+        /* basic dropdown styling */
+        #tag-suggestions {
+            border:1px solid #ccc;
+            display:none;
+            position:absolute;
+            background:white;
+            max-height:100px;
+            overflow-y:auto;
+            z-index: 1000;
+        }
+        #tag-suggestions div {
+            padding:2px 5px;
+            cursor:pointer;
+        }
+        #tag-suggestions div:hover {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
 
-<form method="post">
+<h1>{% if form.instance.pk %}Edit Course{% else %}Create Course{% endif %}</h1>
+
+<form method="post" id="course-form">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{% if course %}Update{% else %}Create{% endif %}</button>
+    <div>
+        {{ form.title.label_tag }}<br>
+        {{ form.title }}
+    </div>
+    <div>
+        {{ form.description.label_tag }}<br>
+        {{ form.description }}
+    </div>
+    <div>
+        {{ form.status.label_tag }}<br>
+        {{ form.status }}
+    </div>
+    <div style="position:relative;">
+        {{ form.tags_input.label_tag }}<br>
+        {{ form.tags_input }}
+        <div id="tag-suggestions"></div>
+    </div>
+
+    <button type="submit">{% if form.instance.pk %}Update Course{% else %}Create Course{% endif %}</button>
 </form>
+
+<script>
+(function() {
+    // Get existing tags from backend as a JSON-safe string
+    const existingTags = {{ all_tags|safe }};
+
+    const input = document.getElementById("id_tags_input");
+    const suggestionsBox = document.getElementById("tag-suggestions");
+
+    input.addEventListener("input", function() {
+        const cursorIndex = this.selectionStart;
+        const value = this.value;
+        const parts = value.substring(0, cursorIndex).split(",");
+        const lastPart = parts[parts.length - 1].trim().toLowerCase();
+
+        suggestionsBox.innerHTML = "";
+        if (!lastPart) { suggestionsBox.style.display = "none"; return; }
+
+        const filtered = existingTags.filter(tag => tag.toLowerCase().startsWith(lastPart));
+        if (filtered.length === 0) { suggestionsBox.style.display = "none"; return; }
+
+        filtered.forEach(tag => {
+            const div = document.createElement("div");
+            div.textContent = tag;
+            div.addEventListener("click", function() {
+                parts[parts.length - 1] = tag;
+                input.value = parts.join(", ") + ", ";
+                suggestionsBox.style.display = "none";
+                input.focus();
+            });
+            suggestionsBox.appendChild(div);
+        });
+        suggestionsBox.style.display = "block";
+
+        // Position box under input
+        const rect = input.getBoundingClientRect();
+        suggestionsBox.style.top = input.offsetTop + input.offsetHeight + "px";
+        suggestionsBox.style.left = input.offsetLeft + "px";
+        suggestionsBox.style.width = input.offsetWidth + "px";
+    });
+
+    document.addEventListener("click", function(e) {
+        if (!suggestionsBox.contains(e.target) && e.target !== input) {
+            suggestionsBox.style.display = "none";
+        }
+    });
+})();
+</script>
+
+</body>
+</html>
