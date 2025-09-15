@@ -161,11 +161,95 @@ class ManageCollaboratorsView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
     model = Course
     form_class = CollaboratorsForm
     template_name = "courses/manage_collaborators.html"
+    login_url = reverse_lazy("login")
 
     def test_func(self):
-        # Only creator can manage collaborators
+        # Only the creator can manage collaborators
         return self.request.user == self.get_object().creator
 
-    def get_success_url(self):
-        return reverse("course-detail", kwargs={"pk": self.object.pk})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        course = self.get_object()
 
+        # All pending collaborators
+        pending = course.pending_collaborators.all()
+        # Show display_name if user exists, else email
+        pending_info = []
+        for p in pending:
+            user = User.objects.filter(email__iexact=p.email).first()
+            pending_info.append({
+                "display_name": user.display_name if user else None,
+                "email": p.email,
+                "exists": bool(user),
+                "profile_picture": user.profile_picture if user else None
+            })
+
+        context["pending_collaborators"] = pending_info
+        context["all_users"] = User.objects.exclude(pk=course.creator.pk)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        course = self.get_object()
+        signer = Signer()
+
+        # Handle removing confirmed collaborator
+        remove_user_id = request.POST.get("remove_user_id")
+        if remove_user_id:
+            user = get_object_or_404(User, id=remove_user_id)
+            course.collaborators.remove(user)
+            return redirect("course-manage-collaborators", pk=course.pk)
+
+        # Handle removing pending collaborator
+        remove_pending_email = request.POST.get("remove_pending_email")
+        if remove_pending_email:
+            pending = course.pending_collaborators.filter(email=remove_pending_email).first()
+            if pending:
+                pending.delete()
+            return redirect("course-manage-collaborators", pk=course.pk)
+
+        # Handle adding multiple users by username/ID
+        new_users = request.POST.getlist("new_users[]")  # array of usernames or IDs
+        for identifier in new_users:
+            identifier = identifier.strip()
+            if not identifier:
+                continue
+
+            # Lookup user by ID or username
+            user = None
+            if identifier.isdigit():
+                user = User.objects.filter(pk=int(identifier)).first()
+            if not user:
+                user = User.objects.filter(username__iexact=identifier).first()
+            
+            if user and user != course.creator:
+                # Stage as pending
+                pending, created = PendingCollaborator.objects.get_or_create(course=course, email=user.email)
+                token = signer.sign(f"{course.pk}:{user.email}")
+                accept_url = request.build_absolute_uri(reverse("accept-collaborator-invite", kwargs={"token": token}))
+                send_mail(
+                    subject=f"You've been invited to collaborate on {course.title}",
+                    message=f"Hi {user.username},\n\n{request.user.display_name} invited you to collaborate on {course.title}.\nClick to accept: {accept_url}",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                )
+
+        # Handle adding multiple emails
+        new_emails = request.POST.getlist("new_emails[]")  # array of emails
+        for email in new_emails:
+            email = email.strip()
+            if not email:
+                continue
+            pending, created = PendingCollaborator.objects.get_or_create(course=course, email=email)
+            token = signer.sign(f"{course.pk}:{email}")
+            accept_url = request.build_absolute_uri(reverse("accept-collaborator-invite", kwargs={"token": token}))
+            send_mail(
+                subject=f"You've been invited to collaborate on {course.title}",
+                message=f"Hi,\n\n{request.user.display_name} invited you to collaborate on {course.title}.\nClick to accept: {accept_url}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+            )
+
+        return redirect("course-manage-collaborators", pk=course.pk)
+
+    def get_success_url(self):
+        return reverse("course-manage-collaborators", kwargs={"pk": self.object.pk})
