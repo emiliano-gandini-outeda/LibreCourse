@@ -207,3 +207,30 @@ This phase is about setting up the project for success, security, and maintainab
 | **3** | **Community**   | Forums, Instructor Dashboards, User Analytics         |
 | **4** | **Engagement**  | Gamification, Curricula                               |
 | **5** | **Scale**       | Public API, Offline Mode, Performance, i18n           |
+
+### Django Templates to Implement:
+- users/signup.html
+- users/login.html
+- users/users.html
+- users/user-details.html #User information (different than current logged in user)
+- users/profile.html #User information (logged user)
+- users/change_password.html
+- users/update_profile.html
+- courses.html #Course List with search/filter bar
+- course.html #individual course page
+- main.html #home page with featured courses, hero section, etc.
+- base.html #base django template to extend
+- users/password_reset_complete.html
+- users/password_reset_confirm.html
+- users/password_reset_done.html
+- users/password_reset.html
+- 400.html – Bad Request
+- 403.html – Permission Denied / Forbidden
+- 404.html – Page Not Found
+- 405.html – Method Not Allowed
+- 500.html – Internal Server Error
+- 502.html – Bad Gateway (optional, for reverse proxy setups)
+- 503.html – Service Unavailable (optional, for maintenance mode)
+- maintenance.html – For planned downtime or maintenance mode.
+- no-access.html – For logged-in users trying to access restricted content.
+- session-expired.html – For session timeout handling.
