@@ -44,23 +44,29 @@ The platform supports both individual educators and collaborative teams, making 
 
 ## 🛠️ Upcoming Features
 
-We’re constantly working to expand LibreCourse. Some features on the roadmap include:
+LibreCourse is continuously evolving. Upcoming features include:
 
-- ✅ **Role & permission system** for fine-grained collaboration.  
-- ✅ **Progress tracking** for learners across lessons and courses.  
-- ✅ **Quiz builder** with multiple question types.  
-- ✅ **Assignments & evaluations** to deepen the learning experience.  
-- ✅ **Embedded video uploads** (beyond YouTube/Vimeo).  
-- ✅ **Discussion forums** for learners to ask and answer questions.  
-- ✅ **Moderation & reporting system** with filtered words and admin tools.  
-- ✅ **Certificates of completion** for finished courses.  
-- ✅ **Gamification** (badges, points, streaks) to motivate learners.  
-- ✅ **Offline mode** (progress syncs when online).  
-- ✅ **Multilingual support** for global communities.  
-- ✅ **API support** for integrations with external tools.  
+* ✅ **Roles & permissions** for fine-grained collaboration.
+* ✅ **Learner progress tracking** across lessons and courses.
+* ✅ **Student progress dashboards** for teachers
 
+  * View individual progress in real-time or general courses.
+  * Track forum participation for better feedback.
+* ✅ **Quiz builder** with multiple question types.
+* ✅ **Assignments & evaluations** to enhance learning.
+* ✅ **Embedded video uploads** beyond external platforms.
+* ✅ **Discussion forums** for teachers and learners.
+* ✅ **Curriculum support**
 
----
+  * Bundle related courses under a shared curriculum.
+  * Shared forum for discussions between teachers and learners.
+  * Course creators can request inclusion in a curriculum.
+* ✅ **Moderation & reporting tools** for admins.
+* ✅ **Certificates of completion** for finished courses.
+* ✅ **Gamification**: badges, points, streaks.
+* ✅ **Offline mode** with automatic progress syncing.
+* ✅ **Multilingual support** for global communities.
+* ✅ **API integrations** with external tools.
 
 ---
 
