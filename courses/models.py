@@ -64,3 +64,23 @@ class Lesson(models.Model):
 def update_course_timestamp(sender, instance, **kwargs):
     course = instance.course
     course.save()
+
+class PendingCollaborator(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="pending_collaborators")
+    email = models.EmailField()
+    username = models.CharField(max_length=150, null=True, blank=True)
+    invited_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def display_name(self):
+        if self.username:
+            user = User.objects.filter(username=self.username).first()
+            if user:
+                return user.display_name
+        return self.email
+
+    def profile_picture(self):
+        user = User.objects.filter(email=self.email).first()
+        if user:
+            return user.profile_picture
+        return "/static/default_avatar.png"
