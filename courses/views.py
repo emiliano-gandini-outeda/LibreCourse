@@ -103,6 +103,12 @@ class CourseUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         # Only the creator can edit the course
         return self.request.user == self.get_object().creator
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pass a plain list of tag names
+        context["all_tags"] = list(Tag.objects.values_list("name", flat=True))
+        return context
+
     def get_success_url(self):
         return reverse("course-detail", kwargs={"pk": self.object.pk})
 
