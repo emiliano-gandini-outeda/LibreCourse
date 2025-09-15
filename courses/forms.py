@@ -1,5 +1,4 @@
 from django import forms
-from .models import Course, Lesson
 from .models import Course, Lesson, Tag
 from users.models import User
 
@@ -33,20 +32,13 @@ class CourseForm(forms.ModelForm):
 class LessonForm(forms.ModelForm):
     class Meta:
         model = Lesson
-        fields = ["title", "content", "position"]  # duration_minutes if you want
-        widgets = {
-            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "Lesson title"}),
-            "content": forms.Textarea(attrs={"class": "form-control", "placeholder": "Lesson content"}),
-            "position": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
-        }
+        fields = ["title", "content"]  # duration_minutes if you want
         labels = {
             "title": "Lesson Title",
             "content": "Lesson Content",
-            "position": "Lesson Order",
+    
         }
-        help_texts = {
-            "position": "Number indicating the order of the lesson in the course.",
-        }
+
 
 class CollaboratorsForm(forms.ModelForm):
     collaborators = forms.ModelMultipleChoiceField(
@@ -54,7 +46,6 @@ class CollaboratorsForm(forms.ModelForm):
         required=False,
         widget=forms.SelectMultiple(attrs={"class": "form-select"})
     )
-
     class Meta:
         model = Course
         fields = ["collaborators"]
