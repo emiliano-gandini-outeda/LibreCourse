@@ -1,169 +1,171 @@
-from django.http import HttpResponse, JsonResponse
-from courses.models import Course, Lesson
-import json
-from django.shortcuts import render, get_object_or_404
+from courses.models import Course, Lesson, Tag
+from users.models import User
 from django.utils.translation import gettext_lazy as _
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.db.models import Case, When, Value, IntegerField, Q
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from courses.forms import CourseForm, LessonForm, CollaboratorsForm
+from django.urls import reverse
+from django import forms
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
+class CourseListView(ListView):
+    model = Course
+    template_name = "courses/course_list.html"
+    context_object_name = "courses"
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = Course.objects.filter(status="pub").distinct()
+        q = self.request.GET.get("q", "").strip()
+        tag_filter = self.request.GET.get("tag", "").strip()
+
+        if q:
+            # Search priority: title=1, tag=2, description=3
+            queryset = queryset.annotate(
+                priority=Case(
+                    When(title__icontains=q, then=Value(1)),
+                    When(tags__name__icontains=q, then=Value(2)),
+                    When(description__icontains=q, then=Value(3)),
+                    default=Value(4),
+                    output_field=IntegerField()
+                )
+            ).filter(
+                Q(title__icontains=q) |
+                Q(tags__name__icontains=q) |
+                Q(description__icontains=q)
+            ).order_by('priority', 'title')
+
+        if tag_filter:
+            queryset = queryset.filter(tags__name__iexact=tag_filter)
+
+        return queryset.distinct()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["all_tags"] = Tag.objects.all()
+        context["current_q"] = self.request.GET.get("q", "")
+        context["current_tag"] = self.request.GET.get("tag", "")
+        return context
+
+class CourseDetailView(DetailView):
+    model = Course
+    context_object_name = "course"
     
-def listCourses(request):
-    courses = Course.objects.all()
-    return render(request, "courses.html", {"courses" : courses})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        course = self.object
 
-def courseById(request, id):
-    course = get_object_or_404(Course, id = id)
-    lessons = course.lesson_set.all().order_by("position")
-    return render(request, "course.html", {"course" : course, "lessons" : lessons})
+        # Lessons ordered by position
+        context["lessons"] = course.lesson_set.all().order_by("position")
 
-def createCourse(request):
-    if request.method != "POST":
-        raise(ValueError("Request not valid")) 
-    else:
-        data = json.loads(request.body)
-        course = Course.objects.create(
-            title = data.get("title"),
-            summary = data.get("summary", ""),
-            price = data.get("price", 0),
-            tags = data.get("tags"),
-            status = "draft"
-        )
-        return HttpResponse(f"Created course: {course.title}")
+        # Related courses: share at least one tag or same creator, exclude self
+        context["related_courses"] = Course.objects.filter(
+            status="pub"
+        ).filter(
+            Q(tags__in=course.tags.all()) | Q(creator=course.creator)
+        ).exclude(id=course.id).distinct()[:5]
+
+        return context
     
-def updateCourse(request, course_id):
-    if request.method != "POST":
-        raise(ValueError("Request not valid")) 
-    else:
-        course = get_object_or_404(Course, id = course_id)
-        data = json.loads(request.body)
-        course.title = data.get("title", course.title)
-        course.summary = data.get("summary", course.summary)
-        course.tags = data.get("tags", course.tags)
-        course.status = data.get("status", course.status)
-        course.save()
-        return HttpResponse(f"Updated course: {course.title}")
+class CourseCreateView(LoginRequiredMixin, CreateView):
+    model = Course
+    form_class = CourseForm
+    template_name = "courses/course_form.html"  # Django default would be courses/course_form.html anyway
 
-def publishedCourses(request):
-    q = request.GET.get("q", "")
-    courses = Course.objects.filter(status="pub")
-    if q:
-        courses = courses.filter(title__icontains=q)
-    return render(request, "courses.html", {"courses": courses})
+    def form_valid(self, form):
+        # assign creator before saving
+        form.instance.creator = self.request.user
+        return super().form_valid(form)
 
-def createLesson(request, course_id):
-    if request.method != "POST":
-            raise(ValueError("Request not valid")) 
-    else:
-        associatedCourse = get_object_or_404(Course, id =  course_id)
-        data = json.loads(request.body)
-        lesson = Lesson.objects.create(
-            title = data.get("title"),
-            content = data.get("content"),
-            course = associatedCourse,
-            duration_minutes = data.get("duration_minutes", 0),
-        )
-        return HttpResponse(f"Lesson Created: {lesson.title}")
+    def get_success_url(self):
+        return reverse("course-detail", kwargs={"pk": self.object.pk})
 
-def updateLesson(request, lesson_id):
-    if request.method != "POST":
-        raise(ValueError("Request not valid"))
-    else:
-        lesson = get_object_or_404(Lesson, id = lesson_id)
-        data = json.loads(request.body)
-        lesson.title = data.get("title", lesson.title)
-        lesson.content = data.get("content", lesson.content)
-        lesson.duration_minutes = data.get("duration_minutes", lesson.duration_minutes)
-        lesson.save()
-        return HttpResponse(f"Lesson Updated: {lesson.title}")
 
-def deleteLesson(request, lesson_id):
-    if request.method != "POST":
-        raise(ValueError("Invalid Request"))
-    else:
-        lesson = get_object_or_404(Lesson, id = lesson_id)
-        title = lesson.title
-        lesson.delete()
-        return HttpResponse(f"Lesson Deleted: {title}")   
+
+class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Course
+    template_name = "courses/course_confirm_delete.html"
+
+    def test_func(self):
+        return self.request.user == self.get_object().creator
+
+    def get_success_url(self):
+        return reverse("course-list")
     
-def deleteCourse(request, course_id):
-    if request.method != "POST":
-        raise(ValueError("Invalid Request"))
-    else:
-        course = get_object_or_404(Course, id = course_id)
-        lesson_count = course.lesson_set.count()
-        title = course.title
-        course.delete()
-        return HttpResponse(f"Deleted course {title} and {lesson_count} lessons")
-    
-def reorderLessons(request, course_id):
-    if request.method != "POST":
-        raise(ValueError("Invalid Request"))
-    else:
-        course = get_object_or_404(Course, id = course_id)
-        data  = json.loads(request.body)
-        valid_ids = set(course.lesson_set.values_list("id", flat=True))
-        recieved_ids = set(data.get("order",[]))
-        if not recieved_ids:
-            raise(ValueError("ID Order Requiered"))
-        elif valid_ids != recieved_ids:
-            raise(ValueError("Invalid Lesson IDs"))
-        else:
-            recieved_ids = data.get("order", [])
-            for positionCounter, lesson_ID in enumerate(recieved_ids, start=1):
-                lesson = get_object_or_404(Lesson, id = lesson_ID, course =  course)
-                lesson.position = positionCounter
-                lesson.save()
-            return HttpResponse(f"Order updated: {recieved_ids}")
+class CourseUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Course
+    form_class = CourseForm
+    template_name = "courses/course_form.html"  # same as create view, can reuse
 
-def toggleCourseStatus(request, course_id):
-    if request.method != "POST":
-        raise(ValueError("Invalid Request"))
-    else:
+    def test_func(self):
+        # Only the creator can edit the course
+        return self.request.user == self.get_object().creator
+
+    def get_success_url(self):
+        return reverse("course-detail", kwargs={"pk": self.object.pk})
+
+class LessonCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = Lesson
+    form_class = LessonForm
+    template_name = "courses/lesson_form.html"
+
+    def test_func(self):
+        course_id = self.kwargs["course_id"]
         course = get_object_or_404(Course, id=course_id)
+        return self.request.user == course.creator or self.request.user in course.collaborators.all()
 
-        if course.status == "draft":
-            course.status = "pub"
-        else:
-            course.status = "draft"
+    def form_valid(self, form):
+        course_id = self.kwargs["course_id"]
+        form.instance.course = get_object_or_404(Course, id=course_id)
+        return super().form_valid(form)
 
-        course.save()
-        return HttpResponse(f'Course "{course.title}" status set to {course.status}')
+    def get_success_url(self):
+        return reverse("course-detail", kwargs={"pk": self.object.course.pk})
 
-def lessonDetails(request, lesson_id):
-    if request.method != "GET":
-        raise(ValueError("Invalid Request"))
-    else:
-        lesson = get_object_or_404(Lesson, id = lesson_id)
-        data = {
-            "id": lesson.id,
-            "title": lesson.title,
-            "content": lesson.content,
-            "duration_minutes": lesson.duration_minutes,
-            "course": {
-                "id": lesson.course.id,
-                "title": lesson.course.title,
-            },
-        }
-        return JsonResponse(data)
-    
-def courseDetails(request, course_id):
-    if request.method != "GET":
-        raise(ValueError("Invalid Request"))
-    else:
-        course = get_object_or_404(Course, id = course_id)
-        lessons = []
-        for lesson in course.lesson_set.all().order_by("position"):
-            lessons.append({
-                "id": lesson.id,
-                "title": lesson.title,
-                "position": lesson.position,
-            })
-        data = {
-            "id" : course.id,
-            "title" : course.title,
-            "created_at" : course.created_at,
-            "status" : course.status,
-            "price" : course.price,
-            "tags" : course.tags,
-            "lessons" : lessons
-        }
-        return JsonResponse(data)
+    def get_initial(self):
+        initial = super().get_initial()
+        course_id = self.kwargs["course_id"]
+        course = get_object_or_404(Course, id=course_id)
+        initial["position"] = course.lesson_set.count() + 1
+        return initial
+
+class LessonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Lesson
+    form_class = LessonForm
+    template_name = "courses/lesson_form.html"
+
+    def test_func(self):
+        lesson = self.get_object()
+        course = lesson.course
+        return self.request.user == course.creator or self.request.user in course.collaborators.all()
+
+    def get_success_url(self):
+        return reverse("course-detail", kwargs={"pk": self.object.course.pk})
+
+class LessonDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Lesson
+    template_name = "courses/lesson_confirm_delete.html"
+
+    def test_func(self):
+        lesson = self.get_object()
+        course = lesson.course
+        return self.request.user == course.creator  # collaborators cannot delete
+
+    def get_success_url(self):
+        return reverse("course-detail", kwargs={"pk": self.object.course.pk})
+
+
+class ManageCollaboratorsView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Course
+    form_class = CollaboratorsForm
+    template_name = "courses/manage_collaborators.html"
+
+    def test_func(self):
+        # Only creator can manage collaborators
+        return self.request.user == self.get_object().creator
+
+    def get_success_url(self):
+        return reverse("course-detail", kwargs={"pk": self.object.pk})
+
