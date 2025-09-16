@@ -75,7 +75,89 @@ More details in [Dev Roadmap](devroadmap.md)
 
 ---
 
-## 🤝 Collaboration - Installation
+## 🤝 How to Contribute
+
+We welcome contributions of all kinds—bug fixes, new features, documentation improvements, or feedback!
+LibreCourse uses the **pull request workflow**. Here’s how you can get involved:
+
+### 🔄 Contribution Workflow
+
+1. **Fork the repository**
+   Click the "Fork" button at the top-right of this repo to create your own copy.
+
+2. **Clone your fork**
+
+   ```bash
+   git clone https://github.com/your-username/LibreCourse.git
+   cd LibreCourse
+   ```
+
+3. **Set up the development environment**
+   Run the setup script:
+
+   ```bash
+   python3 dev_jumpstart.py
+   ```
+
+4. **Configure environment variables**
+   Create a `.env` file in the project root with at least:
+
+   ```
+   SECRET_KEY=your-secret-key
+   ```
+
+   Optional (a local SQLite3 fallback is implemented if not set):
+
+   ```
+   DATABASE_URL=postgres://username:password@localhost:5432/librecourse
+   ```
+
+5. **Create a new branch**
+   Always work in a feature branch, not in `main`:
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+6. **Make your changes**
+
+   * Follow the existing code style and conventions.
+   * Keep commits focused and meaningful.
+
+7. **Test your changes**
+   Make sure the project runs properly:
+
+   ```bash
+   python3 manage.py runserver
+   ```
+
+8. **Commit & push**
+
+   ```bash
+   git add .
+   git commit -m "Add: short description of changes"
+   git push origin feature/your-feature-name
+   ```
+
+9. **Open a Pull Request (PR)**
+   Go to the original repository and open a PR from your branch.
+
+   * Clearly describe what you changed and why.
+   * Reference related issues if applicable (e.g., `Fixes #123`).
+
+---
+
+### ✅ Contribution Guidelines
+
+* Keep PRs small and focused—one feature/fix per PR is best.
+* Update documentation if your changes affect usage.
+* Be respectful and constructive in discussions.
+* All contributions are reviewed before merging.
+
+---
+
+
+## 🤝 Contributions - Project Setup
 
 To make it easier for contributors to set up the project on **Linux (Ubuntu/Debian, Arch-based)** and other supported systems, we provide a single script: `dev_jumpstart.py`.
 
