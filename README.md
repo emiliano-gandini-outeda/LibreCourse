@@ -1,4 +1,26 @@
-# 📚 LibreCourse
+# 📚 LibreCourse  
+
+
+<p align="center">
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-AGPLv3-blue.svg?style=for-the-badge" alt="License: AGPL v3">
+  </a>
+  <img src="https://img.shields.io/badge/Build-Beta-yellow.svg?style=for-the-badge" alt="Build Status">
+  <img src="https://img.shields.io/badge/Version-1.0-green.svg?style=for-the-badge" alt="Version">
+</p>
+
+<p align="center">
+  <a href="https://github.com/emiliano-gandini-outeda/LibreCourse/commits/main">
+    <img src="https://img.shields.io/github/last-commit/emiliano-gandini-outeda/LibreCourse?style=for-the-badge" alt="Last Commit">
+  </a>
+  <a href="https://github.com/emiliano-gandini-outeda/LibreCourse/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
+    <img src="https://img.shields.io/github/issues/emiliano-gandini-outeda/LibreCourse/good%20first%20issue?style=for-the-badge" alt="Good First Issues">
+  </a>
+  <img src="https://img.shields.io/badge/Good%20First-PR-blueviolet.svg?style=for-the-badge" alt="Good First PR">
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge" alt="PRs Welcome">
+</p>
+
+---
 
 **LibreCourse** is an open-source Django application for creating, organizing, and collaborating on courses.  
 It’s designed to empower educators, learners, and communities by providing a flexible, modern platform to share knowledge freely.  
@@ -155,7 +177,6 @@ LibreCourse uses the **pull request workflow**. Here’s how you can get involve
 * All contributions are reviewed before merging.
 
 ---
-
 
 ## 🤝 Contributions - Project Setup
 
