@@ -13,11 +13,7 @@
   <a href="https://github.com/emiliano-gandini-outeda/LibreCourse/commits/main">
     <img src="https://img.shields.io/github/last-commit/emiliano-gandini-outeda/LibreCourse?style=for-the-badge" alt="Last Commit">
   </a>
-  <a href="https://github.com/emiliano-gandini-outeda/LibreCourse/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
-    <img src="https://img.shields.io/github/issues/emiliano-gandini-outeda/LibreCourse/good%20first%20issue?style=for-the-badge" alt="Good First Issues">
-  </a>
-  <img src="https://img.shields.io/badge/Good%20First-PR-blueviolet.svg?style=for-the-badge" alt="Good First PR">
-  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge" alt="PRs Welcome">
+
 </p>
 
 ---
@@ -36,6 +32,23 @@ The platform supports both individual educators and collaborative teams, making 
 
 ---
 
+## 🛠️ Tech Stack
+
+<p align="center">
+  <!-- Frontend -->
+  <img src="https://img.shields.io/badge/HTML5-5.0-orange?style=for-the-badge&logo=html5&logoColor=E34F26" alt="HTML5">
+  <img src="https://img.shields.io/badge/CSS3-3.0-blue?style=for-the-badge&logo=css&logoColor=blue" alt="CSS3">
+  <img src="https://img.shields.io/badge/JavaScript-ES6-yellow?style=for-the-badge&logo=javascript&logoColor=F7DF1E" alt="JavaScript">
+  <img src="https://img.shields.io/badge/TailwindCSS-4.0-cyan?style=for-the-badge&logo=tailwind-css&logoColor=06B6D4" alt="TailwindCSS">
+  <img src="https://img.shields.io/badge/Alpine.js-3.12-green?style=for-the-badge&logo=alpine.js&logoColor=8BC34A" alt="Alpine.js">
+  <img src="https://img.shields.io/badge/PostCSS-8.4.14-red?style=for-the-badge&logo=postcss&logoColor=DD3A0A" alt="PostCSS">
+  <!-- Backend -->
+  <img src="https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python&logoColor=3776AB" alt="Python">
+  <img src="https://img.shields.io/badge/Django-5.0-darkgreen?style=for-the-badge&logo=django&logoColor=092E20" alt="Django">
+  <img src="https://img.shields.io/badge/PostgreSQL-17.0-blue?style=for-the-badge&logo=postgresql&logoColor=4169E1" alt="PostgreSQL">
+</p>
+
+---
 ## 🚀 Features
 
 - 🔑 **User accounts**  
