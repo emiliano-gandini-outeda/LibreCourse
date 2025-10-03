@@ -3,9 +3,9 @@ services:
     image: python:3.12-slim
     container_name: librecourse_web
     command: python dev_jumpstart.py
-    working_dir: /
+    working_dir: /app
     volumes:
-      - .:/
+      - .:/app
     ports:
       - "8081:8000"
     environment:
