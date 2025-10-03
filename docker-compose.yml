@@ -1,0 +1,15 @@
+services:
+  web:
+    image: python:3.12-slim
+    container_name: librecourse_web
+    command: >
+      bash -c "python dev_jumpstart.py"
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"   # Django default dev port
+    environment:
+      DJANGO_PORT: 8000
+    depends_on: []
+    tty: true
