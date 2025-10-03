@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - "8081:8000"
     environment:
       DJANGO_PORT: 8000
     tty: true
