@@ -2,13 +2,12 @@ services:
   web:
     image: python:3.12-slim
     container_name: librecourse_web
-    command: >
-      bash -c "python dev_jumpstart.py"
+    command: python dev_jumpstart.py
     working_dir: /app
     volumes:
       - .:/app
     ports:
-      - "8081:8000"  # internal container port only, Coolify routes automatically
+      - "8000:8000"
     environment:
       DJANGO_PORT: 8000
     tty: true
