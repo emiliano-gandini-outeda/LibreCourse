@@ -13,7 +13,10 @@
   <a href="https://github.com/emiliano-gandini-outeda/LibreCourse/commits/main">
     <img src="https://img.shields.io/github/last-commit/emiliano-gandini-outeda/LibreCourse?style=for-the-badge" alt="Last Commit">
   </a>
+</p>
 
+<p align="center">
+    <a href="https://deepwiki.com/emiliano-gandini-outeda/LibreCourse"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
 ---
