@@ -13,16 +13,22 @@
   <a href="https://github.com/emiliano-gandini-outeda/LibreCourse/commits/main">
     <img src="https://img.shields.io/github/last-commit/emiliano-gandini-outeda/LibreCourse?style=for-the-badge" alt="Last Commit">
   </a>
-</p>
-
-<p align="center">
-    <a href="https://deepwiki.com/emiliano-gandini-outeda/LibreCourse"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+  <a href="https://deepwiki.com/emiliano-gandini-outeda/LibreCourse">
+    <img src="https://img.shields.io/badge/DeepWiki-View%20Docs-8A2BE2?style=for-the-badge&logo=readme&logoColor=white" alt="DeepWiki">
+  </a>
+  <a href="https://discord.gg/ENTX7nQ9Cs">
+    <img src="https://img.shields.io/badge/Discord-Join%20Us-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
+  </a>
 </p>
 
 ---
 
 **LibreCourse** is an open-source Django application for creating, organizing, and collaborating on courses.  
 It’s designed to empower educators, learners, and communities by providing a flexible, modern platform to share knowledge freely.  
+
+---
+
+**Join us in [our Discord Server](https://discord.gg/ENTX7nQ9Cs)!**
 
 ---
 
