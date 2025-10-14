@@ -1,3 +1,12 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}LibreCourse - Courses{% endblock %}</title>
+</head>
+
+
+
+{% block content %}
 <h1>Courses</h1>
 
 <form method="get">
@@ -41,3 +50,4 @@
 {% endif %}
 
 <a href="{% url 'course-create' %}">Create New Course</a>
+{% endblock %}
