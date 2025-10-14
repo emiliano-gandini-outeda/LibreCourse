@@ -1,0 +1,169 @@
+name: "🚀 Feature Request"
+description: Suggest a new feature or claim an existing one from the dev queue
+title: "Feature: <short description>"
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Choose Your Path
+        - **Requesting a Feature**: Suggest a new feature to be added to the development queue
+        - **Claiming a Feature**: Take ownership of an existing feature from the dev queue to implement it
+  
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: "Request Type"
+      description: "Are you suggesting a new feature or claiming an existing one?"
+      options:
+        - "🆕 New Feature Request (add to dev queue)"
+        - "✋ Claim Existing Feature (implement from dev queue)"
+    validations:
+      required: true
+  
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## Feature Details
+  
+  - type: input
+    id: feature_name
+    attributes:
+      label: "Feature Name"
+      placeholder: "e.g. Add user authentication"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: feature_description
+    attributes:
+      label: "Feature Description"
+      description: "Describe what this feature should do."
+      placeholder: "Brief summary of the functionality..."
+    validations:
+      required: true
+  
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## For New Feature Requests Only
+        *Skip this section if you're claiming an existing feature*
+  
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Suggested Priority"
+      description: "How important is this feature to the project?"
+      options:
+        - "Critical (core functionality)"
+        - "High (important enhancement)"
+        - "Medium (nice to have)"
+        - "Low (future consideration)"
+    validations:
+      required: false
+  
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: "Acceptance Criteria"
+      description: "What conditions must be met for this feature to be considered complete?"
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: false
+  
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "Additional Context"
+      description: "Any mockups, examples, or related issues?"
+      placeholder: "Add links, screenshots, or references..."
+    validations:
+      required: false
+  
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## For Claiming Existing Features Only
+        *Skip this section if you're requesting a new feature*
+  
+  - type: input
+    id: existing_issue
+    attributes:
+      label: "Existing Issue/Feature Number"
+      description: "Provide the issue number from the dev queue you want to claim"
+      placeholder: "e.g. #123"
+    validations:
+      required: false
+  
+  - type: textarea
+    id: implementation_plan
+    attributes:
+      label: "Implementation Plan"
+      description: "Explain how you plan to implement it (models, views, templates, etc.)"
+      placeholder: |
+        Step-by-step outline of your approach:
+        1. Create models/database schema
+        2. Implement views/controllers
+        3. Design templates/UI
+        4. Write tests
+        5. Update documentation
+    validations:
+      required: false
+  
+  - type: dropdown
+    id: estimated_timeline
+    attributes:
+      label: "Estimated Timeline"
+      description: "How long do you expect this implementation to take?"
+      options:
+        - "1-3 days"
+        - "4-7 days"
+        - "1-2 weeks"
+        - "2-4 weeks"
+        - "1+ months"
+    validations:
+      required: false
+  
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: "Dependencies"
+      description: "Any blockers, dependencies, or requirements needed before starting?"
+      placeholder: "List any issues that must be resolved first, or external libraries needed..."
+    validations:
+      required: false
+  
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## General Checklist (All Requests)
+  
+  - type: checkboxes
+    id: guidelines
+    attributes:
+      label: "Compliance Checklist"
+      options:
+        - label: "I have reviewed the CONTRIBUTING.md guide"
+          required: true
+        - label: "I will follow PEP 8 standards"
+          required: true
+        - label: "I have searched existing issues/features to avoid duplicates"
+          required: true
+        - label: "I will keep this issue updated with progress (if claiming a feature)"
+          required: false
+  
+  - type: textarea
+    id: questions
+    attributes:
+      label: "Questions or Clarifications Needed"
+      description: "Any questions for the maintainers before proceeding?"
+      placeholder: "Ask any questions about the feature or implementation..."
+    validations:
+      required: false

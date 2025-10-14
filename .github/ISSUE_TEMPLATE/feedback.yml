@@ -1,0 +1,124 @@
+name: "Feedback"
+description: Share your thoughts, suggestions, or general feedback
+title: "Feedback: <short description>"
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We value your feedback! Whether it's about user experience, design, documentation, or anything else - we'd love to hear from you.
+  
+  - type: dropdown
+    id: feedback_type
+    attributes:
+      label: "Feedback Type"
+      description: "What type of feedback are you providing?"
+      options:
+        - "User Experience"
+        - "Design/UI"
+        - "Documentation"
+        - "Performance"
+        - "Accessibility"
+        - "General Suggestion"
+        - "Other"
+    validations:
+      required: true
+  
+  - type: input
+    id: feedback_title
+    attributes:
+      label: "Feedback Summary"
+      placeholder: "e.g. Dashboard navigation could be more intuitive"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: feedback_description
+    attributes:
+      label: "Detailed Feedback"
+      description: "Share your thoughts, observations, or suggestions in detail."
+      placeholder: "Tell us what you think and why..."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: current_experience
+    attributes:
+      label: "Current Experience"
+      description: "Describe how things work now (if applicable)."
+      placeholder: "What is your current experience with this aspect of the project?"
+    validations:
+      required: false
+  
+  - type: textarea
+    id: suggested_improvement
+    attributes:
+      label: "Suggested Improvement"
+      description: "How do you think this could be improved? (if applicable)"
+      placeholder: "Share your ideas for making this better..."
+    validations:
+      required: false
+  
+  - type: dropdown
+    id: impact
+    attributes:
+      label: "Impact on Your Usage"
+      description: "How much does this affect your experience with the project?"
+      options:
+        - "High - Significantly affects my usage"
+        - "Medium - Noticeable impact"
+        - "Low - Minor improvement opportunity"
+        - "N/A - Just sharing thoughts"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: use_case
+    attributes:
+      label: "Use Case/Context"
+      description: "Help us understand when or why this matters."
+      placeholder: "Describe the context in which this feedback applies..."
+    validations:
+      required: false
+  
+  - type: textarea
+    id: examples
+    attributes:
+      label: "Examples or References"
+      description: "Any examples, mockups, or references to similar implementations?"
+      placeholder: "Share links, screenshots, or examples that illustrate your feedback..."
+    validations:
+      required: false
+  
+  - type: dropdown
+    id: user_type
+    attributes:
+      label: "I am a..."
+      description: "This helps us understand different user perspectives."
+      options:
+        - "First-time user"
+        - "Occasional user"
+        - "Regular user"
+        - "Power user/Contributor"
+        - "Just exploring"
+    validations:
+      required: false
+  
+  - type: textarea
+    id: additional_thoughts
+    attributes:
+      label: "Additional Thoughts"
+      description: "Anything else you'd like to add?"
+      placeholder: "Any other comments, ideas, or observations..."
+    validations:
+      required: false
+  
+  - type: checkboxes
+    id: acknowledgment
+    attributes:
+      label: "Acknowledgment"
+      options:
+        - label: "I understand this is feedback and may not result in immediate changes"
+          required: false
+        - label: "I'm open to discussion about this feedback"
+          required: false
