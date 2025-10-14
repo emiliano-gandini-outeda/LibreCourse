@@ -228,6 +228,12 @@ def run_servers():
     print_header("Starting Servers")
     python_bin = get_python_bin()
     port = int(os.environ.get("DJANGO_PORT", DJANGO_PORT))
+
+    start_port = int(os.environ.get("DJANGO_PORT", DJANGO_PORT))
+    port=find_free_port(start_port)
+
+    print_status(f"Using port {port}", ICONS["Success"], color="green")
+
     django_proc = subprocess.Popen([python_bin, "manage.py", "runserver", f"0.0.0.0:{port}"])
     tailwind_proc = subprocess.Popen("npx tailwindcss -i static/css/input.css -o static/css/output.css --watch", shell=True)
 
