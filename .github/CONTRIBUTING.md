@@ -23,7 +23,7 @@ python3 dev_jumpstart.py
 This will:
 
 * Create a `.venv` virtual environment (if missing)
-* Install all Python dependencies from `requirements.txt`
+* Install all Python dependencies from `requirements-dev.txt`
 * Install Node.js and npm dependencies
 * Set up TailwindCSS and PostCSS
 * Start the Django development server and Tailwind watcher
@@ -34,6 +34,23 @@ This will:
  ```bash
  sudo apt install python3-venv
  ```
+
+### 💡 Notes
+
+* If you see warnings from `npm`, they can usually be ignored unless they prevent installation.
+* On first run, you may need to enter your system password for `sudo` commands.  
+
+* After setup, you can re-run:
+
+```bash
+python3 dev_jumpstart.py
+```
+This will **not reinstall everything from scratch**. Instead, it will:
+
+* Check if system dependencies (`curl`, `node`, `npm`, etc.) are present and up to date.
+* Check if Python dependencies in `requirements-dev.txt` have changed and install any missing ones.
+* Check if Node dependencies (`tailwindcss`, `postcss`, etc.) need updating.
+* Start/Restart the **development environment** (Django server + Tailwind watcher).
 
 3. **Configure environment variables**:
    Create a `.env` file in the project root with at least:
@@ -98,7 +115,24 @@ Inside the project virtual environment (`.venv`), run:
 
 <br>
 
-## 🧪 5. Testing with Pytest
+## 📦 5. Adding Dependencies
+
+If your new feature requires additional Python packages, **add them to `requirements.txt`**, **not** `requirements-dev.txt`.
+
+* `requirements.txt` → dependencies needed for the application to run
+* `requirements-dev.txt` → only for development tools (e.g., linters, testing frameworks)
+
+After adding a new dependency, update your virtual environment:
+
+```bash
+.venv/bin/pip install -r requirements.txt
+```
+
+This ensures that everyone running the project will automatically have the required packages for new features.
+
+<br>
+
+## 🧪 6. Testing with Pytest
 
 All tests must use **pytest** and live under `/tests/` organized by app → feature.
 
@@ -122,7 +156,7 @@ Verbose output:
 
 <br>
 
-## 📬 6. Making Changes
+## 📬 7. Making Changes
 
 1. Work in your **feature branch**, never `main`:
 
@@ -142,7 +176,7 @@ git push origin issue-<number>-<short-feature-summary>
 
 <br>
 
-## 🔄 7. Pull Request
+## 🔄 8. Pull Request
 
 1. Open a **PR** to the main repository.
 2. **PR Title:** Match the issue title.
@@ -150,7 +184,7 @@ git push origin issue-<number>-<short-feature-summary>
 
 <br>
 
-## ✅ 8. Review Process
+## ✅ 9. Review Process
 
 All PRs are reviewed for:
 
