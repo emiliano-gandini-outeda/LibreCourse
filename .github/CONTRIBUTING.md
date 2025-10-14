@@ -1,21 +1,61 @@
 # Contributing Guide
 
-We’re excited that you’re interested in contributing to this project!  
-Please follow these steps to ensure a smooth review process.
+We’re excited that you’re interested in contributing to LibreCourse!  
+This guide explains how to set up your environment, follow coding standards, and submit contributions properly.
+
+<br>
+
+## 🌱 1. Set up your development environment
+
+1. **Clone the repository:**
+
+```bash
+git clone https://github.com/your-username/LibreCourse.git
+cd LibreCourse
+```
+
+2. **Run the setup script** (Linux/Ubuntu/Arch compatible):
+
+```bash
+python3 dev_jumpstart.py
+```
+
+This will:
+
+* Create a `.venv` virtual environment (if missing)
+* Install all Python dependencies from `requirements.txt`
+* Install Node.js and npm dependencies
+* Set up TailwindCSS and PostCSS
+* Start the Django development server and Tailwind watcher
 
 
+**⚠️ On some systems, you may need:**
 
-## 🧩 1. Open an Issue
+ ```bash
+ sudo apt install python3-venv
+ ```
 
-Before starting any work, **open an issue** describing the feature or fix you want to implement.
+3. **Configure environment variables**:
+   Create a `.env` file in the project root with at least:
 
-**Issue Title:**  
-Use a short, clear title that describes the feature.
+```
+SECRET_KEY=your-secret-key
+DATABASE_URL=postgres://username:password@localhost:5432/librecourse  # optional
+```
+<br>
 
-**Issue Description:**  
-- Feature name  
-- Short explanation of what it does  
-- Outline of how you plan to implement it
+## 🧩 2. Open an Issue
+
+Before starting work, **open an issue** describing the feature or fix.
+
+**Issue Title:**
+Use a short, clear title.
+
+**Issue Description:**
+
+* Feature name
+* Short explanation of what it does
+* Outline of your implementation plan
 
 Example:
 
@@ -23,81 +63,116 @@ Example:
 # Title: Add user profile picture upload
 
 ## Description:
-- Implement profile picture upload using Django FileField.
-
-Store images in media/pfp/ and display them in user profile templates.
+- Implement profile picture upload using Django FileField
+- Store images in media/pfp/ and display them in user profiles
 ```
+<br>
 
-
-## 🌱 2. Fork and Branch
-
-After your issue is created:
+## 🌿 3. Fork & Branch
 
 1. **Fork** this repository.
-2. Create a **new branch** using the following format:
+2. **Create a new branch** using:
 
 ```text
 issue-<issue-number>-<short-feature-summary>
 ```
 
 Example:
+
 ```text
 issue-42-add-profile-pictures
 ```
+<br>
 
-## 🧹 3. Follow PEP 8
+## 🧹 4. Code Style (PEP 8)
 
-All Python code **must follow [PEP 8](https://peps.python.org/pep-0008/)**.  
-Use `flake8` or `black` before committing:
+All Python code **must follow [PEP 8](https://peps.python.org/pep-0008/)**.
+
+Inside the project virtual environment (`.venv`), run:
 
 ```bash
 .venv/bin/black .
 .venv/bin/flake8 --exclude .venv/
 ```
-## 🧪 4. Testing
+**Fix all formatting issues before committing.**
 
-All tests should be written using **pytest**.
+<br>
 
-Add your test files under the `/tests/` directory, organized by app -> feature.  
-Make sure all tests pass before submitting your pull request.
+## 🧪 5. Testing with Pytest
 
-Run tests:
+All tests must use **pytest** and live under `/tests/` organized by app → feature.
+
+Run tests from project root (inside `.venv`):
+
 ```bash
 .venv/bin/pytest
 ```
-You can also run with detailed output:
+
+Verbose output:
+
 ```bash
 .venv/bin/pytest -v
 ```
 
-All tests must pass before you submit a pull request.
+**⚠️ If you get import errors:**
 
-## 📬 5. Submit a Pull Request
+* Ensure all `tests/` folders have `__init__.py`
+* Remove `.pyc` files and `__pycache__`
+* Avoid running pytest from inside subfolders
 
-Once your branch is ready:
+<br>
 
-1. Push your branch to your fork.
+## 📬 6. Making Changes
 
-2. Open a Pull Request (PR) to the main repository.
+1. Work in your **feature branch**, never `main`:
 
-**PR Title:**
-Match the issue title.
+```bash
+git checkout -b issue-<number>-<short-feature-summary>
+```
 
-**PR Description:**
-Reference the issue (e.g. Closes #42) and summarize your changes.
+2. Make your changes and **follow PEP 8 style**.
+3. **Test** your changes with pytest.
+4. Commit and push:
 
-## ✅ 6. Review Process
+```bash
+git add .
+git commit -m "Add: short description of changes"
+git push origin issue-<number>-<short-feature-summary>
+```
 
-All pull requests will be reviewed for:
+<br>
 
-- Code quality (PEP 8 compliance)
+## 🔄 7. Pull Request
 
-- Readability and maintainability
+1. Open a **PR** to the main repository.
+2. **PR Title:** Match the issue title.
+3. **PR Description:** Reference the issue (e.g., `Closes #42`) and summarize changes.
 
-- Proper documentation and tests
+<br>
 
-When requested changes are addressed, your PR will be merged.
+## ✅ 8. Review Process
+
+All PRs are reviewed for:
+
+* PEP 8 compliance
+* Correctness and maintainability
+* Documentation updates
+* Tests coverage
+
+Once approved and requested changes are made, your PR will be merged.
+
+<br>
+
+## 💡 Notes
+
+* Keep PRs small and focused (one feature/fix per PR)
+* Update documentation if needed
+* Be respectful and constructive in discussions
+* Use the virtual environment `.venv` for all Python commands to avoid conflicts
 
 ---
 
-**Thanks for helping make this project better! 💙**
+<br>
+
+**Thanks for contributing to LibreCourse! 💙**
+
