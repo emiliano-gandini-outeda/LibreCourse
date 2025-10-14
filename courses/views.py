@@ -5,14 +5,19 @@ from django.db.models import Case, When, Value, IntegerField, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import (
+    ListView,
+    DetailView,
+    CreateView,
+    UpdateView,
+    DeleteView,
+)
 from courses.forms import CourseForm, LessonForm, CollaboratorsForm
 from courses.models import Course, Lesson, Tag, PendingCollaborator
 from users.models import User
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.core.signing import Signer
-
 
 
 # Create your views here.
@@ -29,19 +34,23 @@ class CourseListView(ListView):
 
         if q:
             # Search priority: title=1, tag=2, description=3
-            queryset = queryset.annotate(
-                priority=Case(
-                    When(title__icontains=q, then=Value(1)),
-                    When(tags__name__icontains=q, then=Value(2)),
-                    When(description__icontains=q, then=Value(3)),
-                    default=Value(4),
-                    output_field=IntegerField()
+            queryset = (
+                queryset.annotate(
+                    priority=Case(
+                        When(title__icontains=q, then=Value(1)),
+                        When(tags__name__icontains=q, then=Value(2)),
+                        When(description__icontains=q, then=Value(3)),
+                        default=Value(4),
+                        output_field=IntegerField(),
+                    )
                 )
-            ).filter(
-                Q(title__icontains=q) |
-                Q(tags__name__icontains=q) |
-                Q(description__icontains=q)
-            ).order_by('priority', 'title')
+                .filter(
+                    Q(title__icontains=q)
+                    | Q(tags__name__icontains=q)
+                    | Q(description__icontains=q)
+                )
+                .order_by("priority", "title")
+            )
 
         if tag_filter:
             queryset = queryset.filter(tags__name__iexact=tag_filter)
@@ -55,10 +64,11 @@ class CourseListView(ListView):
         context["current_tag"] = self.request.GET.get("tag", "")
         return context
 
+
 class CourseDetailView(DetailView):
     model = Course
     context_object_name = "course"
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         course = self.object
@@ -67,14 +77,16 @@ class CourseDetailView(DetailView):
         context["lessons"] = course.lesson_set.all().order_by("position")
 
         # Related courses: share at least one tag or same creator, exclude self
-        context["related_courses"] = Course.objects.filter(
-            status="pub"
-        ).filter(
-            Q(tags__in=course.tags.all()) | Q(creator=course.creator)
-        ).exclude(id=course.id).distinct()[:5]
+        context["related_courses"] = (
+            Course.objects.filter(status="pub")
+            .filter(Q(tags__in=course.tags.all()) | Q(creator=course.creator))
+            .exclude(id=course.id)
+            .distinct()[:5]
+        )
 
         return context
-    
+
+
 class CourseCreateView(LoginRequiredMixin, CreateView):
     model = Course
     form_class = CourseForm
@@ -89,7 +101,6 @@ class CourseCreateView(LoginRequiredMixin, CreateView):
         return reverse("course-detail", kwargs={"pk": self.object.pk})
 
 
-
 class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Course
     template_name = "courses/course_confirm_delete.html"
@@ -99,7 +110,8 @@ class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def get_success_url(self):
         return reverse("course-list")
-    
+
+
 class CourseUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Course
     form_class = CourseForm
@@ -118,6 +130,7 @@ class CourseUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_success_url(self):
         return reverse("course-detail", kwargs={"pk": self.object.pk})
 
+
 class LessonCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Lesson
     form_class = LessonForm
@@ -126,7 +139,10 @@ class LessonCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def test_func(self):
         course_id = self.kwargs["course_id"]
         course = get_object_or_404(Course, id=course_id)
-        return self.request.user == course.creator or self.request.user in course.collaborators.all()
+        return (
+            self.request.user == course.creator
+            or self.request.user in course.collaborators.all()
+        )
 
     def form_valid(self, form):
         course_id = self.kwargs["course_id"]
@@ -143,6 +159,7 @@ class LessonCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         initial["position"] = course.lesson_set.count() + 1
         return initial
 
+
 class LessonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Lesson
     form_class = LessonForm
@@ -151,8 +168,11 @@ class LessonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         lesson = self.get_object()
         course = lesson.course
-        return self.request.user == course.creator or self.request.user in course.collaborators.all()
-    
+        return (
+            self.request.user == course.creator
+            or self.request.user in course.collaborators.all()
+        )
+
     def get_object(self, queryset=None):
         lesson_id = self.kwargs.get("lesson_id")
         return get_object_or_404(Lesson, id=lesson_id)
@@ -160,7 +180,6 @@ class LessonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_success_url(self):
         return reverse("course-detail", kwargs={"pk": self.object.course.pk})
 
-    
 
 class LessonDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Lesson
@@ -195,12 +214,14 @@ class ManageCollaboratorsView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
         pending_info = []
         for p in pending:
             user = User.objects.filter(email__iexact=p.email).first()
-            pending_info.append({
-                "display_name": user.display_name if user else None,
-                "email": p.email,
-                "exists": bool(user),
-                "profile_picture": user.profile_picture if user else None
-            })
+            pending_info.append(
+                {
+                    "display_name": user.display_name if user else None,
+                    "email": p.email,
+                    "exists": bool(user),
+                    "profile_picture": user.profile_picture if user else None,
+                }
+            )
 
         context["pending_collaborators"] = pending_info
         context["all_users"] = User.objects.exclude(pk=course.creator.pk)
@@ -220,7 +241,9 @@ class ManageCollaboratorsView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
         # Handle removing pending collaborator
         remove_pending_email = request.POST.get("remove_pending_email")
         if remove_pending_email:
-            pending = course.pending_collaborators.filter(email=remove_pending_email).first()
+            pending = course.pending_collaborators.filter(
+                email=remove_pending_email
+            ).first()
             if pending:
                 pending.delete()
             return redirect("course-manage-collaborators", pk=course.pk)
@@ -238,12 +261,16 @@ class ManageCollaboratorsView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
                 user = User.objects.filter(pk=int(identifier)).first()
             if not user:
                 user = User.objects.filter(username__iexact=identifier).first()
-            
+
             if user and user != course.creator:
                 # Stage as pending
-                pending, created = PendingCollaborator.objects.get_or_create(course=course, email=user.email)
+                pending, created = PendingCollaborator.objects.get_or_create(
+                    course=course, email=user.email
+                )
                 token = signer.sign(f"{course.pk}:{user.email}")
-                accept_url = request.build_absolute_uri(reverse("accept-collaborator-invite", kwargs={"token": token}))
+                accept_url = request.build_absolute_uri(
+                    reverse("accept-collaborator-invite", kwargs={"token": token})
+                )
                 send_mail(
                     subject=f"You've been invited to collaborate on {course.title}",
                     message=f"Hi {user.username},\n\n{request.user.display_name} invited you to collaborate on {course.title}.\nClick to accept: {accept_url}",
@@ -257,9 +284,13 @@ class ManageCollaboratorsView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
             email = email.strip()
             if not email:
                 continue
-            pending, created = PendingCollaborator.objects.get_or_create(course=course, email=email)
+            pending, created = PendingCollaborator.objects.get_or_create(
+                course=course, email=email
+            )
             token = signer.sign(f"{course.pk}:{email}")
-            accept_url = request.build_absolute_uri(reverse("accept-collaborator-invite", kwargs={"token": token}))
+            accept_url = request.build_absolute_uri(
+                reverse("accept-collaborator-invite", kwargs={"token": token})
+            )
             send_mail(
                 subject=f"You've been invited to collaborate on {course.title}",
                 message=f"Hi,\n\n{request.user.display_name} invited you to collaborate on {course.title}.\nClick to accept: {accept_url}",
@@ -272,7 +303,9 @@ class ManageCollaboratorsView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
     def get_success_url(self):
         return reverse("course-manage-collaborators", kwargs={"pk": self.object.pk})
 
+
 # JSON endpoint for autocomplete
+
 
 @require_GET
 def user_autocomplete(request):
@@ -288,7 +321,7 @@ def user_autocomplete(request):
                 "id": u.id,
                 "display_name": u.display_name,
                 "username": u.username,
-                "profile_picture": u.profile_picture or "/static/default_avatar.png"
+                "profile_picture": u.profile_picture or "/static/default_avatar.png",
             }
             for u in qs
         ]

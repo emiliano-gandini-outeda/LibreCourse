@@ -11,42 +11,64 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('courses', '0001_initial'),
+        ("courses", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='course',
-            name='collaborators',
-            field=models.ManyToManyField(blank=True, related_name='collaborating_courses', to=settings.AUTH_USER_MODEL),
+            model_name="course",
+            name="collaborators",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="collaborating_courses",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='course',
-            name='creator',
-            field=models.ForeignKey(blank=True, null=True, on_delete=models.SET(courses.models.get_deleted_user), related_name='courses', to=settings.AUTH_USER_MODEL),
+            model_name="course",
+            name="creator",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=models.SET(courses.models.get_deleted_user),
+                related_name="courses",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='course',
-            name='favorites',
-            field=models.ManyToManyField(blank=True, related_name='favorite_courses', to=settings.AUTH_USER_MODEL),
+            model_name="course",
+            name="favorites",
+            field=models.ManyToManyField(
+                blank=True, related_name="favorite_courses", to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='lesson',
-            name='course',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courses.course', verbose_name='lessons'),
+            model_name="lesson",
+            name="course",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="courses.course",
+                verbose_name="lessons",
+            ),
         ),
         migrations.AddField(
-            model_name='course',
-            name='tags',
-            field=models.ManyToManyField(blank=True, related_name='courses', to='courses.tag'),
+            model_name="course",
+            name="tags",
+            field=models.ManyToManyField(
+                blank=True, related_name="courses", to="courses.tag"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='lesson',
-            constraint=models.UniqueConstraint(fields=('title', 'course'), name='unique_colessourse_lesson_status'),
+            model_name="lesson",
+            constraint=models.UniqueConstraint(
+                fields=("title", "course"), name="unique_colessourse_lesson_status"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='course',
-            constraint=models.UniqueConstraint(fields=('title', 'status'), name='unique_course_title_status'),
+            model_name="course",
+            constraint=models.UniqueConstraint(
+                fields=("title", "status"), name="unique_course_title_status"
+            ),
         ),
     ]

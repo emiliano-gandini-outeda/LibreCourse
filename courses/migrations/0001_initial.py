@@ -7,48 +7,82 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Course',
+            name="Course",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=30)),
-                ('description', models.TextField(max_length=450)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('pub', 'Public'), ('priv', 'Private'), ('dra', 'Draft')], default='dra', max_length=15)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=30)),
+                ("description", models.TextField(max_length=450)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pub", "Public"),
+                            ("priv", "Private"),
+                            ("dra", "Draft"),
+                        ],
+                        default="dra",
+                        max_length=15,
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Course',
-                'verbose_name_plural': 'Courses',
-                'db_table': 'study_courses',
-                'ordering': ['-created_at'],
+                "verbose_name": "Course",
+                "verbose_name_plural": "Courses",
+                "db_table": "study_courses",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Lesson',
+            name="Lesson",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=30)),
-                ('content', models.TextField(verbose_name='lesson_contents')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('position', models.IntegerField(verbose_name='Lesson Order')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=30)),
+                ("content", models.TextField(verbose_name="lesson_contents")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("position", models.IntegerField(verbose_name="Lesson Order")),
             ],
             options={
-                'verbose_name': 'Lesson',
-                'verbose_name_plural': 'Lessons',
-                'db_table': 'study_lessons',
-                'ordering': ['-position'],
+                "verbose_name": "Lesson",
+                "verbose_name_plural": "Lessons",
+                "db_table": "study_lessons",
+                "ordering": ["-position"],
             },
         ),
         migrations.CreateModel(
-            name='Tag',
+            name="Tag",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=30, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=30, unique=True)),
             ],
         ),
     ]
