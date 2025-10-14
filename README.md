@@ -121,7 +121,7 @@ More details in [Dev Roadmap](devroadmap.md)
 
 ### 🤝 How to Contribute
 
-We welcome contributions of all kinds:bug fixes, new features, documentation improvements, or just some old good feedback!
+We welcome contributions of all kinds: bug fixes, new features, documentation improvements, or just some old good feedback!
 
 To get started, please follow our detailed [Contributing Guide](.github/CONTRIBUTING.md).
 It covers:
