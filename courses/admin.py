@@ -1,6 +1,5 @@
 from django.contrib import admin
 from .models import Course, Lesson, Tag
-from users.models import User
 
 
 # -------------------------
@@ -29,7 +28,12 @@ class LessonInline(admin.TabularInline):
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ("title", "creator", "status", "created_at", "updated_at")
-    search_fields = ("title", "description", "creator__email", "creator__username")
+    search_fields = (
+                    "title",
+                    "description",
+                    "creator__email",
+                    "creator__username"
+                    )
     list_filter = ("status", "tags")
     ordering = ("-created_at",)
     filter_horizontal = ("tags", "favorites", "collaborators")
