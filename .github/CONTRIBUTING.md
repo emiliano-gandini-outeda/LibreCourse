@@ -109,9 +109,7 @@ Inside the project virtual environment (`.venv`), run:
 
 ```bash
 .venv/bin/black .
-.venv/bin/flake8 --exclude .venv/
 ```
-**Fix all formatting issues before committing.**
 
 <br>
 
