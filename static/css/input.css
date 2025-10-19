@@ -1,0 +1,30 @@
+/* input.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles using raw CSS colors instead of @apply */
+body {
+  font-family: system-ui, sans-serif;
+  background-color: #f3f4f6; /* equivalent to bg-gray-100 */
+  color: #111827; /* equivalent to text-gray-900 */
+}
+
+.btn {
+  background-color: #3b82f6; /* blue-500 */
+  color: white;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+}
+
+.btn:hover {
+  background-color: #2563eb; /* blue-600 */
+}
+
+.card {
+  padding: 1rem;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+}

@@ -5,6 +5,8 @@ import sys
 import platform
 import shutil
 import socket
+import time
+import hashlib
 
 # -------------------- CONFIG --------------------
 PY_DEPS = [
@@ -22,6 +24,8 @@ PY_DEPS = [
 VENV_PATH = ".venv"
 DJANGO_PORT = 8000
 NODE_MIN_VERSION = (20, 17, 0)
+
+DEBUG = False
 
 ICONS = {
     "Arch": "",
@@ -65,22 +69,25 @@ def print_status(msg, icon="", color="white", indent=0):
     print(f"{c}{indent_str}[{icon}] {msg}{RESET}")
 
 
-def run_cmd(cmd, check=True, env=None, hide_warnings=False):
-    if hide_warnings and isinstance(cmd, list) and cmd[0] == "npm":
-        # Redirect stderr to null
-        if platform.system().lower() != "windows":
-            cmd_str = " ".join(cmd) + " 2>/dev/null"
-            subprocess.run(cmd_str, check=check, shell=True)
-            return
-        else:
-            # On Windows, npm quiet mode
-            cmd.append("--quiet")
-    print_status(
-        f"> {' '.join(cmd) if isinstance(cmd, list) else cmd}",
-        icon=ICONS["Info"],
-        indent=1,
-    )
-    subprocess.run(cmd, check=check, env=env, shell=isinstance(cmd, str))
+def run_cmd(cmd, check=True, env=None, hide_warnings=False, debug=False):
+    if isinstance(cmd, list):
+        cmd_str = " ".join(cmd)
+    else:
+        cmd_str = cmd
+
+    if debug:
+        print_status(f"[DEBUG] Running command: {cmd_str}", ICONS["Info"], color="magenta")
+
+    try:
+        subprocess.run(cmd, check=check, env=env, shell=isinstance(cmd, str))
+    except subprocess.CalledProcessError as e:
+        print_status(f"[ERROR] Command failed: {cmd_str}", ICONS["Warning"], color="red")
+        print_status(f"[ERROR] Return code: {e.returncode}", ICONS["Warning"], color="red")
+        if hasattr(e, "stdout") and e.stdout:
+            print(e.stdout)
+        if hasattr(e, "stderr") and e.stderr:
+            print(e.stderr)
+        raise
 
 
 def detect_os():
@@ -269,22 +276,30 @@ def install_node(os_type):
         sys.exit(1)
 
 
+# -------------------- NODE / NPM / TAILWIND --------------------
 def install_npm_deps():
-    print_header("TailwindCSS Setup")
+    print_header("TailwindCSS + LightningCSS Setup")
     ensure_node()
 
-    packages = ["tailwindcss", "@tailwindcss/cli", "postcss", "autoprefixer"]
+    # Correct package for LightningCSS CLI
+    packages = ["tailwindcss", "@tailwindcss/cli", "lightningcss-cli"]
+
     if not os.path.exists("package.json"):
         run_cmd(["npm", "init", "-y"], hide_warnings=True)
 
     run_cmd(["npm", "install", "--save-dev"] + packages, hide_warnings=True)
 
     tailwind_bin = os.path.join("node_modules", ".bin", "tailwindcss")
+    lightning_bin = os.path.join("node_modules", ".bin", "lightningcss")
+
     if not os.path.exists(tailwind_bin):
         print_status("TailwindCSS binary not found!", ICONS["Warning"], color="yellow")
         sys.exit(1)
-    print_status("TailwindCSS is installed and ready.", ICONS["Success"], color="green")
+    if not os.path.exists(lightning_bin):
+        print_status("LightningCSS binary not found!", ICONS["Warning"], color="yellow")
+        sys.exit(1)
 
+    print_status("TailwindCSS + LightningCSS installed successfully.", ICONS["Success"], color="green")
 
 # -------------------- SERVER --------------------
 def find_free_port(start_port):
@@ -296,30 +311,47 @@ def find_free_port(start_port):
         port += 1
 
 
+def file_hash(path):
+    with open(path, "rb") as f:
+        return hashlib.md5(f.read()).hexdigest()
+
 def run_servers():
     print_header("Starting Servers")
     python_bin = get_python_bin()
     port = int(os.environ.get("DJANGO_PORT", DJANGO_PORT))
-
-    start_port = int(os.environ.get("DJANGO_PORT", DJANGO_PORT))
-    port = find_free_port(start_port)
-
+    port = find_free_port(port)
     print_status(f"Using port {port}", ICONS["Success"], color="green")
 
+    # Start Django dev server
     django_proc = subprocess.Popen(
         [python_bin, "manage.py", "runserver", f"0.0.0.0:{port}"]
     )
-    tailwind_proc = subprocess.Popen(
-        "npx tailwindcss -i static/css/input.css -o static/css/output.css --watch",
-        shell=True,
-    )
+    print_status("Django server started.", ICONS["Server"], color="green")
 
+    # Tailwind watch
+    tailwind_cmd = "./node_modules/.bin/tailwindcss -i static/css/input.css -o static/css/output.css --watch"
+    tailwind_proc = subprocess.Popen(tailwind_cmd, shell=True)
+    print_status("TailwindCSS watching for changes...", ICONS["Tailwind"], color="cyan")
+
+    lightning_bin = "./node_modules/.bin/lightningcss"
+    output_file = "static/css/output.css"
+    min_file = "static/css/output.min.css"
+
+    last_hash = None
     try:
-        django_proc.wait()
-        tailwind_proc.wait()
+        while True:
+            if os.path.exists(output_file):
+                current_hash = file_hash(output_file)
+                if last_hash != current_hash:
+                    last_hash = current_hash
+                    # Run LightningCSS
+                    subprocess.run(
+                        [lightning_bin, output_file, "-o", min_file, "--minify", "--targets", ">= 0.25%"]
+                    )
+                    print_status("[🎨] LightningCSS rebuilt output.min.css", ICONS["Tailwind"], color="green")
+            time.sleep(0.2)  # short debounce to avoid double triggers
     except KeyboardInterrupt:
-        print_status("\n")
-        print_status("Stopping servers...", ICONS["Stop"], color="yellow")
+        print_status("\nStopping servers...", ICONS["Stop"], color="yellow")
         django_proc.terminate()
         tailwind_proc.terminate()
 

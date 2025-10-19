@@ -21,11 +21,15 @@
     "@tailwindcss/cli": "^4.1.14",
     "@tailwindcss/postcss": "^4.1.13",
     "autoprefixer": "^10.4.21",
+    "lightningcss": "^1.30.2",
+    "lightningcss-cli": "^1.30.2",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.14"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "npx tailwindcss -i static/css/input.css -o static/css/output.css && npx lightningcss static/css/output.css -o static/css/output.min.css --minify --targets '>= 0.25%'",
+    "watch:css": "npx tailwindcss -i static/css/input.css -o static/css/output.css --watch & npx lightningcss static/css/output.css -o static/css/output.min.css --minify --targets '>= 0.25%' --watch"
   },
   "repository": {
     "type": "git",
